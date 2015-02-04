@@ -1,0 +1,5 @@
+Doall includes a number of threads flag??
+GPU or CPU? Should be fine with CPU?
+
+What does batchsize do
+Need to tell it to cut off
