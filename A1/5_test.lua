@@ -30,7 +30,7 @@ function test()
    print('==> testing on test set:')
    for t = 1,testData:size() do
       -- disp progress
-      xlua.progress(t, testData:size())
+--      xlua.progress(t, testData:size())
 
       -- get new sample
       local input = testData.data[t]
@@ -54,6 +54,9 @@ function test()
 
    -- update log/plot
    testLogger:add{['% mean class accuracy (test set)'] = confusion.totalValid * 100}
+
+   aveacc=confusion.totalValid*100
+
    if opt.plot then
       testLogger:style{['% mean class accuracy (test set)'] = '-'}
       testLogger:plot()
@@ -64,7 +67,7 @@ function test()
       -- restore parameters
       parameters:copy(cachedparams)
    end
-   
+
    -- next iteration:
    confusion:zero()
 end

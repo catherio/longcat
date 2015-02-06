@@ -126,7 +126,7 @@ function train()
    print("==> online epoch # " .. epoch .. ' [batchSize = ' .. opt.batchSize .. ']')
    for t = 1,trainData:size(),opt.batchSize do
       -- disp progress
-      xlua.progress(t, trainData:size())
+--      xlua.progress(t, trainData:size())
 
       -- create mini batch
       local inputs = {}

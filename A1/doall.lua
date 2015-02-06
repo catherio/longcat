@@ -4,9 +4,9 @@
 -- using multiple optimization techniques (SGD, ASGD, CG), and
 -- multiple types of models.
 --
--- This script demonstrates a classical example of training 
+-- This script demonstrates a classical example of training
 -- well-known models (convnet, MLP, logistic regression)
--- on a 10-class classification problem. 
+-- on a 10-class classification problem.
 --
 -- It illustrates several points:
 -- 1/ description of the model
@@ -16,6 +16,8 @@
 --
 -- Clement Farabet
 ----------------------------------------------------------------------
+
+require 'csvigo'
 
 ----------------------------------------------------------------------
 print '==> processing options'
@@ -72,7 +74,37 @@ dofile '5_test.lua'
 ----------------------------------------------------------------------
 print '==> training!'
 
-while true do
+aveacc= 0
+aveTable = {ave={}}
+continue = true
+while continue do
    train()
    test()
+   table.insert(aveTable.ave,aveacc)
+   n=#aveTable.ave
+   --apply a random criteria:
+   --at least 10 epochs, improvement < 0
+   if n >= 10 then
+      ave=torch.Tensor(aveTable.ave)
+      c=ave[n]-ave[n-1]
+      if c < 0 then continue=false end
+   end
 end
+
+resultLogger = {id={},prediction={}}
+model:evaluate()
+for t = 1,testData:size() do
+   input = testData.data[t]
+   target = testData.labels[t]
+   if opt.type == 'double' then input = input:double()
+   elseif opt.type == 'cuda' then input = input:cuda() end
+   -- test sample
+   pred = model:forward(input)
+   --save predicted label based on max(nll), will change based on criterion
+   m,ptarget = pred:max(1)
+   table.insert(resultLogger.id,target)
+   table.insert(resultLogger.prediction,ptarget[1])
+end
+
+p={resultPath=opt.save..'/results.csv'}
+csvigo.save{data=resultLogger,path=p.resultPath}
