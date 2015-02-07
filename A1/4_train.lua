@@ -124,9 +124,15 @@ function train()
    -- do one epoch
    print('==> doing epoch on training data:')
    print("==> online epoch # " .. epoch .. ' [batchSize = ' .. opt.batchSize .. ']')
+
+   -- parameters controlling when/how time estimates are displayed
+   estimateStart = 5; -- make initial estimate at this training sample
+   estimateInterval = 500; -- give updates after every nth training sample
+
+   -- run the training loop
    for t = 1,trainData:size(),opt.batchSize do
       -- disp progress
---      xlua.progress(t, trainData:size())
+      -- xlua.progress(t, trainData:size())
 
       -- create mini batch
       local inputs = {}
@@ -183,12 +189,24 @@ function train()
       else
          optimMethod(feval, parameters, optimState)
       end
+
+	  -- estimate the total training time
+	  if (t == estimateStart) or (t % estimateInterval == 0) then
+	  	 timeSoFar = sys.clock() - time
+		 print("==> interim time for "..t.." samples is "..
+				  (os.date("!%X",timeSoFar)))
+		 estimate = timeSoFar * (trainData.size()/t)
+		 print("    estimated time for "..trainData.size().." samples is "..
+				  (os.date("!%X",estimate)))
+      end
    end
 
    -- time taken
    time = sys.clock() - time
+   print("\n==> overall time = " .. (os.date("!%X",time)) .. 's')
    time = time / trainData:size()
-   print("\n==> time to learn 1 sample = " .. (time*1000) .. 'ms')
+   print("==> number of training samples = " .. trainData.size())
+   print("==> time per sample = " .. (time*1000) .. 'ms')
 
    -- print confusion matrix
    print(confusion)

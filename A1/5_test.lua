@@ -28,9 +28,11 @@ function test()
 
    -- test over test data
    print('==> testing on test set:')
+
+   -- run the testing loop
    for t = 1,testData:size() do
       -- disp progress
---      xlua.progress(t, testData:size())
+      -- xlua.progress(t, testData:size())
 
       -- get new sample
       local input = testData.data[t]
@@ -46,8 +48,10 @@ function test()
 
    -- timing
    time = sys.clock() - time
-   time = time / testData:size()
-   print("\n==> time to test 1 sample = " .. (time*1000) .. 'ms')
+   print("\n==> overall time = " .. (os.date("!%X",time)) .. 's')
+   time = time / trainData:size()
+   print("==> number of training samples = " .. trainData.size())
+   print("==> time per sample = " .. (time*1000) .. 'ms')
 
    -- print confusion matrix
    print(confusion)
