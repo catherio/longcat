@@ -29,6 +29,8 @@ if not opt then
    cmd:text('Options:')
    cmd:option('-size', 'small', 'how many samples do we load: small | full | extra')
    cmd:option('-visualize', true, 'visualize input data and weights during training')
+   cmd:option('-gausswidth', 1, 'sigma_horz for gaussian preprocessing')
+   cmd:option
    cmd:text()
    opt = cmd:parse(arg or {})
 end
@@ -157,6 +159,20 @@ testData.data = testData.data:float()
 --     to one.
 --   + color channels are normalized globally, across the entire dataset;
 --     as a result, each color component has 0-mean and 1-norm across the dataset.
+
+-- co modification: take a chunk out of each image
+print '==! modification: gaussian window'
+params = {height=32, width=32, sigma_vert=2, sigma_horz=opt.gausswidth}
+for i = 1,trainData:size() do
+    local g = image.gaussian(params):double()
+    g = g:repeatTensor(3, 1, 1)
+    trainData.data[i] = g:cmul(trainData.data[i]:double())
+end
+for i = 1,testData:size() do
+    local g = image.gaussian(params):double()
+    g = g:repeatTensor(3, 1, 1)
+    testData.data[i] = g:cmul(testData.data[i]:double())
+end
 
 -- Convert all images to YUV
 print '==> preprocessing data: colorspace RGB -> YUV'
