@@ -19,7 +19,17 @@
 
 TODO what does our submission consist of
 
+\section{Summary of Modifications}
+
+Overall, we tried three significant modifications to the tutorial code provided:
+\begin{enumerate}
+\item We added a windowing step in preprocessing, designed to eliminate distracting information (including adjacent house numbers unrelated to the target digit) by obscuring the edges of the images. This modification is described in the Preprocessing section. It ultimately did not improve performance, so in the submitted model we set the width of the window to have no effect, although the ability to decrease the window size is present in the submitted code.
+\item We increased the dimensionality of the first two layers, from 64 to 128. This modification is described in the Architecture section. It improved our performance from [TODO what to what?].
+\item We tried varying sizes of normalization kernel [TODO what?]; however, we were able to try out these modification only on the CPU, not on the GPU, and the tradeoff with speed was not worth it in the last few days before the deadline, so we did not include these modifications in our submitted model.
+\end{enumerate}
+
 \section{Preprocessing}
+\label{preprocessing}
 
 We preprocessed each image in the following manner. First, we converted the
 images from RGB representations to YUV, to separate luminance from color, with
