@@ -7,13 +7,14 @@
 \usepackage{subcaption}
 \usepackage{amsmath}
 \usepackage{enumerate}
+\usepackage{natbib}
 
-\begin{document}
-\maketitle
 
-%Gaussian kernel: Didn't help. Above 0.35, maybe helped?
-%Dimensionality of first two layers (nstates): To 128 (helped)
-%Normalization kernel size: can only be run on CPU
+\begin{document} \maketitle
+
+%Gaussian kernel: Didn't help. Above 0.35, maybe helped?  Dimensionality of
+%first two layers (nstates): To 128 (helped) Normalization kernel size: can
+%only be run on CPU
 
 \section{Submission details}
 
@@ -21,15 +22,22 @@ TODO what does our submission consist of
 
 \section{Summary of Modifications}
 
-Overall, we tried three significant modifications to the tutorial code provided:
-\begin{enumerate}
-\item We added a windowing step in preprocessing, designed to eliminate distracting information (including adjacent house numbers unrelated to the target digit) by obscuring the edges of the images. This modification is described in the Preprocessing section. It ultimately did not improve performance, so in the submitted model we set the width of the window to have no effect, although the ability to decrease the window size is present in the submitted code.
-\item We increased the dimensionality of the first two layers, from 64 to 128. This modification is described in the Architecture section. It improved our performance from [TODO what to what?].
-\item We tried varying sizes of normalization kernel [TODO what?]; however, we were able to try out these modification only on the CPU, not on the GPU, and the tradeoff with speed was not worth it in the last few days before the deadline, so we did not include these modifications in our submitted model.
-\end{enumerate}
+Overall, we tried three significant modifications to the tutorial code
+provided: \begin{enumerate} \item We added a windowing step in preprocessing,
+designed to eliminate distracting information (including adjacent house numbers
+unrelated to the target digit) by obscuring the edges of the images. This
+modification is described in the Preprocessing section. It ultimately did not
+improve performance, so in the submitted model we set the width of the window
+to have no effect, although the ability to decrease the window size is present
+in the submitted code.  \item We increased the dimensionality of the first two
+layers, from 64 to 128. This modification is described in the Architecture
+section. It improved our performance from [TODO what to what?].  \item We tried
+varying sizes of normalization kernel [TODO what?]; however, we were able to
+try out these modification only on the CPU, not on the GPU, and the tradeoff
+with speed was not worth it in the last few days before the deadline, so we did
+not include these modifications in our submitted model.  \end{enumerate}
 
-\section{Preprocessing}
-\label{preprocessing}
+\section{Preprocessing} \label{preprocessing}
 
 We preprocessed each image in the following manner. First, we converted the
 images from RGB representations to YUV, to separate luminance from color, with
@@ -43,8 +51,7 @@ each channel, and dividing by the standard deviation (zscore), for the train
 data. We then used this mean and standard deviation to transform the test data
 (to keep training and testing data separate). \\
 
-CATHERINE ADD PREPROCESSING W/ GAUSSIAN KERNEL DETAILS:\\
-
+CAT ADD PREPROCESSING W/ GAUSSIAN KERNEL DETAILS:\\
 
 \section{Architecture}
 
@@ -58,16 +65,23 @@ TODO summary paragraph. In particular:
 \section{Learning Techniques}
 \begin{itemize}
 \item Data augmentations?
-\item Dropout?
+\item Dropout: We used a dropout probability of 0.5 on the third layer to
+regularize neurons and prevent `coadaptation'
+\cite{hinton_improving_2012}
 \end{itemize}
 
 \section{Training Procedure}
+We used standard stochastic gradient descent, since the optimization problem is
+non-convex for our architecture. 
 \begin{itemize}
-\item Learning rate
-\item Momentum
-\item Error metrics
-\item Train/validation split
-\item Training/validation/test error
+\item Learning Rate $1 \times 10^{-7}$
+\item Momentum of $0$
+\item Loss function: negative log likelihood (nll)
+\item Train/validation split: $73257/26032$
+\item Training/validation error: CAT
 \end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{writeup}
 
 \end{document}

@@ -1,0 +1,11 @@
+\begin{thebibliography}{1}
+
+\bibitem{hinton_improving_2012}
+Geoffrey~E. Hinton, Nitish Srivastava, Alex Krizhevsky, Ilya Sutskever, and
+  Ruslan~R. Salakhutdinov.
+\newblock Improving neural networks by preventing co-adaptation of feature
+  detectors.
+\newblock {\em {arXiv}:1207.0580 [cs]}, July 2012.
+\newblock {arXiv}: 1207.0580.
+
+\end{thebibliography}
