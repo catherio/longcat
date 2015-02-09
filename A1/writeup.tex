@@ -21,7 +21,20 @@ TODO what does our submission consist of
 
 \section{Preprocessing}
 
-TODO data preprocessing
+We preprocessed each image in the following manner. First, we converted the
+images from RGB representations to YUV, to separate luminance from color, with
+the working assumption that pixels that are part of address numbers will have
+different luminance, but possibly similar color. (Note: because torch's rgb2yuv
+requires floating point representation, we recast the original representation of
+the data. \\
+
+Next, we normalized each feature globally, by subtracting the global mean for
+each channel, and dividing by the standard deviation (zscore), for the train
+data. We then used this mean and standard deviation to transform the test data
+(to keep training and testing data separate). \\
+
+CATHERINE ADD PREPROCESSING W/ GAUSSIAN KERNEL DETAILS:\\
+
 
 \section{Architecture}
 
