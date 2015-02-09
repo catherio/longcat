@@ -1,0 +1,60 @@
+\documentclass{article}
+\title{DS-GA-1008 Assignment 1}
+\author{LongCat: Catherine Olsson and Long Sha and Kevin Brown}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{enumerate}
+
+\begin{document}
+\maketitle
+
+%Gaussian kernel: Didn't help. Above 0.35, maybe helped?
+%Dimensionality of first two layers (nstates): To 128 (helped)
+%Normalization kernel size: can only be run on CPU
+
+\section{Submission details}
+
+TODO what does our submission consist of
+
+\section{Summary of Modifications}
+
+Overall, we tried three significant modifications to the tutorial code provided:
+\begin{enumerate}
+\item We added a windowing step in preprocessing, designed to eliminate distracting information (including adjacent house numbers unrelated to the target digit) by obscuring the edges of the images. This modification is described in the Preprocessing section. It ultimately did not improve performance, so in the submitted model we set the width of the window to have no effect, although the ability to decrease the window size is present in the submitted code.
+\item We increased the dimensionality of the first two layers, from 64 to 128. This modification is described in the Architecture section. It improved our performance from [TODO what to what?].
+\item We tried varying sizes of normalization kernel [TODO what?]; however, we were able to try out these modification only on the CPU, not on the GPU, and the tradeoff with speed was not worth it in the last few days before the deadline, so we did not include these modifications in our submitted model.
+\end{enumerate}
+
+\section{Preprocessing}
+\label{preprocessing}
+
+TODO data preprocessing
+
+\section{Architecture}
+
+TODO summary paragraph. In particular:
+\begin{itemize}
+\item Number and type of layers
+\item Number of neurons
+\item Size of input
+\end{itemize}
+
+\section{Learning Techniques}
+\begin{itemize}
+\item Data augmentations?
+\item Dropout?
+\end{itemize}
+
+\section{Training Procedure}
+\begin{itemize}
+\item Learning rate
+\item Momentum
+\item Error metrics
+\item Train/validation split
+\item Training/validation/test error
+\end{itemize}
+
+\end{document}

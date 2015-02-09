@@ -29,6 +29,7 @@ if not opt then
    cmd:text('Options:')
    cmd:option('-size', 'small', 'how many samples do we load: small | full | extra')
    cmd:option('-visualize', true, 'visualize input data and weights during training')
+   cmd:option('-gausswidth', 1, 'sigma_horz for gaussian preprocessing')
    cmd:text()
    opt = cmd:parse(arg or {})
 end
