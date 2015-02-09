@@ -35,6 +35,9 @@ cmd:option('-size', 'full', 'how many samples do we load: small | full | extra')
 cmd:option('-gausswidth', 2, 'sigma_horz for gaussian window preprocessing')
 -- model:
 cmd:option('-model', 'convnet', 'type of model to construct: linear | mlp | convnet')
+cmd:option('-filtsize', 5, 'filter size, default = 5')
+cmd:option('-poolsize', 2, 'pooling size, default = 2')
+cmd:option('-normkernelsize', 7, 'gaussian kernel size for normalization, default = 7')
 -- loss:
 cmd:option('-loss', 'nll', 'type of loss function to minimize: nll | mse | margin')
 -- training:
@@ -83,9 +86,9 @@ while continue do
    test()
    table.insert(aveTable.ave,aveacc)
    n=#aveTable.ave
-   --apply a random criteria:
-   --at least 10 epochs, improvement < 0
-   if n >= 10 then
+   --apply a random criterion:
+   --at least 150 epochs, improvement < 0
+   if n >= 150 then
       ave=torch.Tensor(aveTable.ave)
       c=ave[n]-ave[n-1]
       if c < 0 then continue=false end

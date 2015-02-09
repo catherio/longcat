@@ -48,10 +48,10 @@ ninputs = nfeats*width*height
 nhiddens = ninputs / 2
 
 -- hidden units, filter sizes (for ConvNet only):
-nstates = {64,64,128}
-filtsize = 5
-poolsize = 2
-normkernel = image.gaussian1D(7)
+nstates = {128,128,128}
+filtsize = opt.filtsize
+poolsize = opt.poolsize
+normkernel = image.gaussian1D(opt.normkenelsize)
 
 ----------------------------------------------------------------------
 print '==> construct model'
