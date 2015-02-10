@@ -16,10 +16,6 @@
 %first two layers (nstates): To 128 (helped) Normalization kernel size: can
 %only be run on CPU
 
-\section{Submission details}
-
-TODO what does our submission consist of
-
 \section{Summary of Modifications}
 
 Overall, we tried three significant modifications to the tutorial code
@@ -30,7 +26,7 @@ provided:
 
 \item We increased the dimensionality of the first two layers, from 64 to 128. This modification is described in the Architecture section. It improved our performance.
 
-\item We tried varying sizes of normalization kernel [TODO what?]; however, we were able to try out these modification only on the CPU, not on the GPU, and the tradeoff with speed was not worth it in the last few days before the deadline, so we did not include these modifications in our submitted model.
+\item We tried varying sizes of normalization kernel; however, we were able to try out these modification only on the CPU, not on the GPU, and the tradeoff with speed was not worth it in the last few days before the deadline, so we did not include these modifications in our submitted model.
 \end{enumerate}
 
 \section{Preprocessing}
@@ -67,34 +63,19 @@ The input size is 3 color channels, and 32-by-32 pixels.
 
 We increased the number of filters in the first two layers, to 128 in both cases, which improved performance. We kept the filter size at 5, and the pooling size at 3.
 
-I assume that the number of neurons can be calculated as follows: The input layer contains $32*32=1024$ neurons, one per pixel; Layer One has 128 convolutional filter banks, where each bank convolutionally represents one neuron per input pixel with the same filters/weights shared by each neuron, makes $128 * 1024 = 131072$ neurons in layer 1; These are then pooled in neighborhoods of size $3*3$ to reduce to $14563$ inputs to the second layer; Layer Two has 128 neurons per Layer One output, makes $128*14563=1864064$ neurons in Layer two; 
+I assume that the number of neurons can be calculated as follows: The input layer contains $32*32*3=3072$ neurons, one per pixel and RGB; Layer One has 128 convolutional filter banks, where each bank convolutionally represents one neuron per input pixel with the same filters/weights shared by each neuron, makes $128 * 32*32 = 131072$ neurons in layer 1; These are then pooled in neighborhoods of size $3*3$ to reduce to $14563 = 113*128$ inputs to the second layer; Layer Two has 128 neurons per 113 of those Layer One stacks, so it has $14563$ neurons itself; finally, there are $128$ neurons in the final layer in the 2-layer neural network at the end. By our calculations this gives rise to $3072 + 131072 + 14563 + 128 = 148835$ neurons. However, as we have not yet learned in class what counts as a ``neuron'' in these networks, we are not certain that we have done this correctly.
 
-\begin{itemize}
-\item Number and type of layers
-\item Number of neurons
-\item Size of input
-\end{itemize}
+\section{Learning Techniques and Training Procedure}
+No data augmentations were used beyond the standard preprocessing. We used a dropout probability of 0.5 on the third layer to regularize neurons and prevent `coadaptation'.
 
-\section{Learning Techniques}
-\begin{itemize}
-\item Data augmentations? n/a
-\item Dropout: We used a dropout probability of 0.5 on the third layer to
-regularize neurons and prevent `coadaptation'
-\cite{hinton_improving_2012}
-\end{itemize}
-
-\section{Training Procedure}
 We used standard stochastic gradient descent, since the optimization problem is
-non-convex for our architecture. 
+non-convex for our architecture. We used the default values for the following parameters as provided in the existing code:
 \begin{itemize}
 \item Learning Rate $1 \times 10^{-7}$
 \item Momentum of $0$
 \item Loss function: negative log likelihood (nll)
 \item Train/validation split: $73257/26032$
-\item Training/validation error: So far we’ve only trained our model based on the training dataset from the assignment, without splitting the training dataset into validation set. We did not train our model on the test dataset. However, our current results are based on model performance on the test set. 
+\item Training/validation error: So far we have only trained our model based on the training dataset from the assignment, without splitting the training dataset into validation set. Although we certainly did not train our model on the test dataset, nonetheless we did select the model that had the best performance on the test set, so in that sense our results are not fully clean. A fully clean demonstration of the success of an algorithm would require fully held-out data that was never seen by the creators nor used in manually crafting model details, above and beyond never having been by the model in the training step.
 \end{itemize}
-
-\bibliographystyle{plain}
-\bibliography{writeup}
 
 \end{document}
