@@ -1,3 +1,14 @@
+=== Quick links ===
+Kaggle:
+https://inclass.kaggle.com/c/assignment-12
+Dataset:
+http://cs.stanford.edu/~acoates/stl10/. 
+Are we there yet:
+http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html#53544c2d3130
+Assignment PDF:
+http://cilvr.nyu.edu/lib/exe/fetch.php?hash=183704&media=http%3A%2F%2Fcs.nyu.edu%2F~cp1995%2FA2.pdf
+
+=== TODOs ===
 [ ] Script to automatically download or pull in the data
 [ ] How to turn binary or .mat files into torch files
 [ ] Research on unsupervised learning methods - what's even the goal?
@@ -16,6 +27,7 @@
 [ ] Build a more sophisticated pipeline
   [ ] data
   	[ ] Normalization
+    [ ] Augmentations
   [ ] model
   	[ ] Deeper model
 	[ ] Prelu?
