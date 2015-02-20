@@ -1,0 +1,28 @@
+[ ] Script to automatically download or pull in the data
+[ ] How to turn binary or .mat files into torch files
+[ ] Research on unsupervised learning methods - what's even the goal?
+[ ] Build the stupidest pipeline
+  [ ] data
+  	[ ] Grab binary data
+	[ ] Mean subtraction
+  [ ] model
+  	[ ] Very simple linear model
+  [ ] loss
+  	[ ] Just one option, very simple
+  [ ] train
+  	[ ] Basic supervised training, just like A1
+  [ ] test
+    [ ] Borrow from A1
+[ ] Build a more sophisticated pipeline
+  [ ] data
+  	[ ] Normalization
+  [ ] model
+  	[ ] Deeper model
+	[ ] Prelu?
+  [ ] loss
+  	(Nothing to do?)
+  [ ] train
+  	[ ] Option to define a validation set
+    [ ] Option to use 10-fold cross validation
+  [ ] unsupervised
+  	[ ] TODO what even?
