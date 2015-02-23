@@ -84,7 +84,6 @@ aveacc= 0
 aveTable = {ave={}}
 continue = true
 while continue do
-
 -- add validation method
     if opt.validation=='cross' then
         aveValTemp=torch.zeros(opt.totalSplit,1)
@@ -99,12 +98,11 @@ while continue do
         end
         aveTrainAcc = aveTrainTemp:mean()
         aveValAcc = aveValTemp:mean()
-        dofile 'saveLog.lua'
     else
         train()
         test()
-        dofile 'saveLog.lua'
     end
+    dofile 'saveLog.lua'
 
     table.insert(aveTable.ave,aveacc)
     n=#aveTable.ave
