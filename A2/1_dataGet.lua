@@ -43,14 +43,14 @@ if (not paths.dir(opt.datafolder .. 'test.dat') or
 	   not paths.dir(opt.datafolder .. 'train.dat') or 
 	   not paths.dir(opt.datafolder .. 'unlabel.dat')) then
    -- Download only if not already there
-   if opt.dataloc == 'scp' then
+   if opt.datatransfer == 'scp' then
 	  print '==> SCPing data remotely from HPC. Please first open an HPC tunnel!'
 	  os.execute('scp -r mercer:/scratch/ls3470/DeepLearning/A2 ./' .. opt.datafolder)
-    print '==> Done copying data from HPC'
-   elseif opt.dataloc == 'hpc' then
+	  print '==> Done copying data from HPC'
+   elseif opt.datatransfer == 'hpc' then
 	  print '==> Copying data locally within HPC'
 	  os.execute('cp -rv /scratch/ls3470/DeepLearning/A2 ./' .. opt.datafolder)
-    print '==> Done copying data locally within HPC'
+	  print '==> Done copying data locally within HPC'
    end
 
 end
