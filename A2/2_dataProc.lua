@@ -25,6 +25,7 @@ if not opt then
    cmd:text()
    cmd:text('Options:')
    cmd:option('-size', 'small', 'how many unlabeled samples do we load: small | full')
+   cmd:option('-datafolder', 'dataset', 'subdirectory where dataset is saved')
    cmd:text()
    opt = cmd:parse(arg or {})
 end
@@ -35,9 +36,9 @@ end
 -- mattorch package allows 1-to-1 conversion between Torch and Matlab
 -- files.
 
-unlabel_file = 'unlabel.dat'
-train_file = 'train.dat'
-test_file = 'test.dat'
+unlabel_file = opt.datafolder .. '/unlabel.dat'
+train_file = opt.datafolder .. '/train.dat'
+test_file = opt.datafolder .. '/test.dat'
 
 ----------------------------------------------------------------------
 -- unlabeled/training/test size

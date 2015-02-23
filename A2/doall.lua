@@ -30,6 +30,8 @@ cmd:option('-normkernelsize', 7, 'gaussian kernel size for normalization, defaul
 cmd:option('-loss', 'nll', 'type of loss function to minimize: nll | mse | margin')
 -- training:
 cmd:option('-save', 'results', 'subdirectory to save/log experiments in')
+cmd:option('-datafolder', 'dataset', 'subdirectory where dataset is saved')
+cmd:option('-datatransfer', 'hpc', 'how to get the data: local on hpc, or scp remotely: hpc | scp')
 cmd:option('-optimization', 'SGD', 'optimization method: SGD | ASGD | CG | LBFGS')
 cmd:option('-learningRate', 1e-3, 'learning rate at t=0')
 cmd:option('-batchSize', 1, 'mini-batch size (1 = pure stochastic)')
@@ -60,11 +62,12 @@ torch.manualSeed(opt.seed)
 ----------------------------------------------------------------------
 print '==> executing all'
 
+dofile '1_dataGet.lua' --will only re-download if necessary
 dofile '2_dataProc.lua'
 dofile '3_model.lua'
 dofile '4_loss.lua'
-dofile '5_train.lua'
-dofile '6_test.lua'
+dofile '5_train.lua' --creates a function called train()
+dofile '6_test.lua' --creates a function called test()
 
 ----------------------------------------------------------------------
 print '==> training!'
