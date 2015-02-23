@@ -1,11 +1,15 @@
 ----------------------------------------------------------------------
+-- Loss function
+--
 -- This script demonstrates how to define a couple of different
 -- loss functions:
 --   + negative-log likelihood, using log-normalized output units (SoftMax)
 --   + mean-square error
 --   + margin loss (SVM-like)
 --
--- Clement Farabet
+-- Script structure borrowed from Clement Farabet
+--
+-- LongCat: Catherine Olsson, Long Sha, Kevin Brown
 ----------------------------------------------------------------------
 
 require 'torch'   -- torch
@@ -17,7 +21,7 @@ if not opt then
    print '==> processing options'
    cmd = torch.CmdLine()
    cmd:text()
-   cmd:text('SVHN Loss Function')
+   cmd:text('STL-10 Loss Function')
    cmd:text()
    cmd:text('Options:')
    cmd:option('-loss', 'nll', 'type of loss function to minimize: nll | mse | margin')

@@ -1,8 +1,7 @@
 ----------------------------------------------------------------------
--- This script demonstrates how to define a training procedure,
--- irrespective of the model/loss functions chosen.
---
--- It shows how to:
+-- Training procedure
+-- 
+-- This script defines the training procedure, with options to...
 --   + construct mini-batches on the fly
 --   + define a closure to estimate (a noisy) loss
 --     function, as well as its derivatives wrt the parameters of the
@@ -10,11 +9,13 @@
 --   + optimize the function, according to several optmization
 --     methods: SGD, L-BFGS.
 --
--- Clement Farabet
+-- 
+-- Script structure borrowed from Clement Farabet
+--
+-- LongCat: Catherine Olsson, Long Sha, Kevin Brown
 ----------------------------------------------------------------------
 
 require 'torch'   -- torch
---require 'xlua'    -- xlua provides useful tools, like progress bars
 require 'optim'   -- an optimization package, for online and batch methods
 
 ----------------------------------------------------------------------
@@ -28,7 +29,6 @@ if not opt then
    cmd:text('Options:')
    cmd:option('-save', 'results', 'subdirectory to save/log experiments in')
    cmd:option('-visualize', false, 'visualize input data and weights during training')
-   cmd:option('-plot', false, 'live plot')
    cmd:option('-optimization', 'SGD', 'optimization method: SGD | ASGD | CG | LBFGS')
    cmd:option('-learningRate', 1e-3, 'learning rate at t=0')
    cmd:option('-batchSize', 1, 'mini-batch size (1 = pure stochastic)')
@@ -76,22 +76,26 @@ elseif opt.validation == 'cross' then
 
     chunk = torch.floor(trsize * 1/opt.totalSplit)
 
+	-- fill validation set: take the nth chunk (simple slice)
     valSet={
       data = trainData.data[{{curSplit*chunk+1,curSplit*chunk+chunk},{},{},{}}],
       labels = trainData.labels[{{curSplit*chunk+1,curSplit*chunk+chunk}}],
       size = function() return chunk end
     }
 
+	-- fill training set. bipartite slicing is harder... just fill with
+	-- zeroes first, then populate
     trainSet={
       data = torch.zeros(trsize-chunk,3,96,96),
       labels = torch.zeros(trsize-chunk),
       size = function() return trsize-chunk end
     }
 
-    trainSet.data[{{1,curSplit*chunk+1},{},{},{}}]=trainData.data[{{1,curSplit*chunk+1},{},{},{}}]
+	-- populate the training set in two slices
+trainSet.data[{{1,curSplit*chunk+1},{},{},{}}]=trainData.data[{{1,curSplit*chunk+1},{},{},{}}]
     trainSet.data[{{curSplit*chunk+1,-1},{},{},{}}]=trainData.data[{{curSplit*chunk+chunk+1,-1},{},{},{}}]
     trainSet.labels[{{1,curSplit*chunk+1}}]=trainData.labels[{{1,curSplit*chunk+1}}]
-    trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
+trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
 
 end
 
@@ -185,8 +189,6 @@ function train()
 
    -- run the training loop
    for t = 1,trainSet:size(),opt.batchSize do
-      -- disp progress
-      -- xlua.progress(t, trainSet:size())
 
       -- create mini batch
       local inputs = {}

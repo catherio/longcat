@@ -1,12 +1,17 @@
 ----------------------------------------------------------------------
--- This script implements a test procedure, to report accuracy
--- on the test data. Nothing fancy here...
+-- Testing
+-- 
+-- This script tests the model on the current validation set,
+-- as defined in the variable "valset". For k-fold cross-validation,
+-- this script will be called once per fold.
 --
--- Clement Farabet
+-- Script structure borrowed from Clement Farabet
+--
+-- LongCat: Catherine Olsson, Long Sha, Kevin Brown
 ----------------------------------------------------------------------
 
+
 require 'torch'   -- torch
--- require 'xlua'    -- xlua provides useful tools, like progress bars
 require 'optim'   -- an optimization package, for online and batch methods
 
 ----------------------------------------------------------------------

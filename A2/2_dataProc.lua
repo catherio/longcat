@@ -1,17 +1,14 @@
 ----------------------------------------------------------------------
-----------------------------------------------------------------------
 -- Data preprocessing
 --
 -- This script preprocesses the data.
--- 1, Load and reshape small/full unlabeled data for unsupervised learning
--- 2, Load and reshape train/test dataset
--- 3, todo: Create validation set from training data
--- 4, Preprocess all datasets: zscore and normalize
+-- 1, Load and reshape small or full unlabeled data for unsupervised learning
+-- 2, Load and reshape train and test dataset
+-- 3, Preprocess all datasets: zscore and normalize
 --
 -- Script structure borrowed from Clement Farabet
 --
 -- LongCat: Catherine Olsson, Long Sha, Kevin Brown
-----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
 require 'torch'   -- torch
@@ -28,7 +25,6 @@ if not opt then
    cmd:text()
    cmd:text('Options:')
    cmd:option('-size', 'small', 'how many unlabeled samples do we load: small | full')
-   cmd:option('-visualize', true, 'visualize input data and weights during training')
    cmd:text()
    opt = cmd:parse(arg or {})
 end

@@ -41,7 +41,6 @@ cmd:option('-normkernelsize', 7, 'gaussian kernel size for normalization, defaul
 cmd:option('-loss', 'nll', 'type of loss function to minimize: nll | mse | margin')
 -- training:
 cmd:option('-save', 'results', 'subdirectory to save/log experiments in')
-cmd:option('-plot', false, 'live plot')
 cmd:option('-optimization', 'SGD', 'optimization method: SGD | ASGD | CG | LBFGS')
 cmd:option('-learningRate', 1e-3, 'learning rate at t=0')
 cmd:option('-batchSize', 1, 'mini-batch size (1 = pure stochastic)')
@@ -51,9 +50,9 @@ cmd:option('-t0', 1, 'start averaging at t0 (ASGD only), in nb of epochs')
 cmd:option('-maxIter', 2, 'maximum nb of iterations for CG and LBFGS')
 cmd:option('-type', 'double', 'type: double | float | cuda')
 -- validation
-cmd:option('-validation', 'cross', 'method for validation, 1 subset, cross validation, or test set: sub | cross | test')
-cmd:option('-valratio', 1/4, 'validation set ratio compared to training')
-cmd:option('-totalSplit', 10, 'number of validation sets in training')
+cmd:option('-validation', 'cross', 'method for validation: a single validation set, cross validation, or use the test set directly: sub | cross | test')
+cmd:option('-valratio', 1/4, 'validation set ratio compared to training, for subset validation only')
+cmd:option('-totalSplit', 10, 'number of validation sets in training, for cross-validation only')
 cmd:text()
 opt = cmd:parse(arg or {})
 
