@@ -1,3 +1,10 @@
+----------------------------------------------------------------------
+-- This script updates train log and test log, and saves model
+--
+-- Script structure borrowed from Clement Farabet
+--
+-- LongCat: Catherine Olsson, Long Sha, Kevin Brown
+----------------------------------------------------------------------
 
 -- update logger/plot
 trainLogger:add{['% mean class accuracy (train set)'] = aveTrainAcc}
