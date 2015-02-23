@@ -64,6 +64,8 @@ print '==> executing all'
 
 dofile '1_dataGet.lua' --will only re-download if necessary
 dofile '2_dataProc.lua'
+-- dofile 2.5_unsupervised.lua
+-- dofile 2.75_applyUnsupervised.lua? Or is this 
 dofile '3_model.lua'
 dofile '4_loss.lua'
 dofile '5_train.lua' --creates a function called train()
