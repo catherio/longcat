@@ -6,7 +6,7 @@
 -- 1, Load and reshape small/full unlabeled data for unsupervised learning
 -- 2, Load and reshape train/test dataset
 -- 3, todo: Create validation set from training data
--- 4, todo: Preprocess all datasets: zscore
+-- 4, Preprocess all datasets: zscore and normalize
 --
 -- Script structure borrowed from Clement Farabet
 --
@@ -89,12 +89,11 @@ trainData = {
 }
 
 -- load the test data.
-
 loaded = torch.load(test_file,'ascii')
 testData = {
-   data = loaded.X:transpose(1,2):reshape(tesize,3,96,96):transpose(3,4),
-   labels = loaded.y[1],
-   size = function() return tesize end
+  data = loaded.X:transpose(1,2):reshape(tesize,3,96,96):transpose(3,4),
+  labels = loaded.y[1],
+  size = function() return tesize end
 }
 
 
