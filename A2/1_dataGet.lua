@@ -46,10 +46,11 @@ if (not paths.dir(opt.datafolder .. 'test.dat') or
    if opt.dataloc == 'scp' then
 	  print '==> SCPing data remotely from HPC. Please first open an HPC tunnel!'
 	  os.execute('scp -r mercer:/scratch/ls3470/DeepLearning/A2 ./' .. opt.datafolder)
-
+    print '==> Done copying data from HPC'
    elseif opt.dataloc == 'hpc' then
 	  print '==> Copying data locally within HPC'
 	  os.execute('cp -rv /scratch/ls3470/DeepLearning/A2 ./' .. opt.datafolder)
+    print '==> Done copying data locally within HPC'
    end
 
 end
