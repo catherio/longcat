@@ -14,6 +14,7 @@
 require 'torch'   -- torch
 require 'image'   -- for color transforms
 require 'nn'      -- provides a normalization operator
+require 'csvigo'  -- for loading fold_txt
 
 ----------------------------------------------------------------------
 -- parse command line arguments
@@ -39,6 +40,7 @@ end
 unlabel_file = opt.datafolder .. '/unlabel.dat'
 train_file = opt.datafolder .. '/train.dat'
 test_file = opt.datafolder .. '/test.dat'
+
 
 ----------------------------------------------------------------------
 -- unlabeled/training/test size
@@ -125,17 +127,18 @@ testData.data = testData.data:float()
 -- Convert all images to YUV
 print '==> preprocessing data: colorspace RGB -> YUV'
 for i = 1,unlabelData:size() do
-   unlabelData.data[i] = image.rgb2yuv(unlabelData.data[i])
+    unlabelData.data[i] = image.rgb2yuv(unlabelData.data[i])
 end
 for i = 1,trainData:size() do
-   trainData.data[i] = image.rgb2yuv(trainData.data[i])
+    trainData.data[i] = image.rgb2yuv(trainData.data[i])
 end
 for i = 1,testData:size() do
-   testData.data[i] = image.rgb2yuv(testData.data[i])
+    testData.data[i] = image.rgb2yuv(testData.data[i])
 end
 
 -- Name channels for convenience
-channels = {'y','u','v'}
+ channels = {'y','u','v'}
+--channels = {'r','g','b'}
 
 -- Normalize each channel, and store mean/std
 -- per channel. These values are important, as they are part of

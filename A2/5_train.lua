@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
 -- Training procedure
--- 
+--
 -- This script defines the training procedure, with options to...
 --   + construct mini-batches on the fly
 --   + define a closure to estimate (a noisy) loss
@@ -9,7 +9,7 @@
 --   + optimize the function, according to several optmization
 --     methods: SGD, L-BFGS.
 --
--- 
+--
 -- Script structure borrowed from Clement Farabet
 --
 -- LongCat: Catherine Olsson, Long Sha, Kevin Brown
@@ -92,10 +92,10 @@ elseif opt.validation == 'cross' then
     }
 
 	-- populate the training set in two slices
-trainSet.data[{{1,curSplit*chunk+1},{},{},{}}]=trainData.data[{{1,curSplit*chunk+1},{},{},{}}]
+    trainSet.data[{{1,curSplit*chunk+1},{},{},{}}]=trainData.data[{{1,curSplit*chunk+1},{},{},{}}]
     trainSet.data[{{curSplit*chunk+1,-1},{},{},{}}]=trainData.data[{{curSplit*chunk+chunk+1,-1},{},{},{}}]
     trainSet.labels[{{1,curSplit*chunk+1}}]=trainData.labels[{{1,curSplit*chunk+1}}]
-trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
+    trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
 
 end
 

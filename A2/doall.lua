@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
 -- Doall for STL-10
--- 
+--
 -- Script structure borrowed from Clement Farabet
 --
 -- LongCat: Catherine Olsson, Long Sha, Kevin Brown
@@ -22,7 +22,7 @@ cmd:option('-threads', 2, 'number of threads')
 -- data:
 cmd:option('-size', 'small', 'how many samples do we load: small | full | extra')
 -- model:
-cmd:option('-model', 'linear', 'type of model to construct: linear | mlp | convnet')
+cmd:option('-model', 'convnet', 'type of model to construct: linear | mlp | convnet')
 cmd:option('-filtsize', 5, 'filter size, default = 5')
 cmd:option('-poolsize', 2, 'pooling size, default = 2')
 cmd:option('-normkernelsize', 7, 'gaussian kernel size for normalization, default = 7')
@@ -34,9 +34,9 @@ cmd:option('-datafolder', 'dataset', 'subdirectory where dataset is saved')
 cmd:option('-datatransfer', 'hpc', 'how to get the data: local on hpc, or scp remotely: hpc | scp')
 cmd:option('-optimization', 'SGD', 'optimization method: SGD | ASGD | CG | LBFGS')
 cmd:option('-learningRate', 1e-3, 'learning rate at t=0')
-cmd:option('-batchSize', 1, 'mini-batch size (1 = pure stochastic)')
+cmd:option('-batchSize', 128, 'mini-batch size (1 = pure stochastic)')
 cmd:option('-weightDecay', 0, 'weight decay (SGD only)')
-cmd:option('-momentum', 0, 'momentum (SGD only)')
+cmd:option('-momentum', 0.998, 'momentum (SGD only)')
 cmd:option('-t0', 1, 'start averaging at t0 (ASGD only), in nb of epochs')
 cmd:option('-maxIter', 2, 'maximum nb of iterations for CG and LBFGS')
 cmd:option('-type', 'double', 'type: double | float | cuda')
@@ -65,7 +65,7 @@ print '==> executing all'
 dofile '1_dataGet.lua' --will only re-download if necessary
 dofile '2_dataProc.lua'
 -- dofile 2.5_unsupervised.lua
--- dofile 2.75_applyUnsupervised.lua? Or is this 
+-- dofile 2.75_applyUnsupervised.lua? Or is this
 dofile '3_model.lua'
 dofile '4_loss.lua'
 dofile '5_train.lua' --creates a function called train()

@@ -47,6 +47,8 @@ nhiddens = ninputs / 2
 nstates = {128,128,128}
 filtsize = opt.filtsize
 poolsize = opt.poolsize
+stride = 1;
+padding = 0;
 normkernel = image.gaussian1D(opt.normkenelsize)
 
 ----------------------------------------------------------------------
@@ -61,35 +63,33 @@ if opt.model == 'linear' then
 
 elseif opt.model == 'convnet' then
 
-   if opt.type == 'cuda' then
-	  
-	  -- TODO THIS IS NOT WORKING YET
 	  print '!!!! This has not been implemented yet!'
-	  
+
       -- a typical modern convolution network (conv+relu+pool)
       model = nn.Sequential()
 
       -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
-      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize))
+      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize, stride, stride, padding))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
       -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
-      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize))
+      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize, stride, stride, padding))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
+      local calcDim = function(x)
+          return ((x+padding*2)-(filtsize-1))/poolsize
+      end
       -- stage 3 : standard 2-layer neural network
-      model:add(nn.View(nstates[2]*filtsize*filtsize))
+      newDimW = calcDim(calcDim(width))
+      newDimH = calcDim(calcDim(height))
+      model:add(nn.View(nstates[2]*newDimW*newDimH))
       model:add(nn.Dropout(0.5))
-      model:add(nn.Linear(nstates[2]*filtsize*filtsize, nstates[3]))
+      model:add(nn.Linear(nstates[2]*newDimW*newDimH, nstates[3]))
       model:add(nn.ReLU())
       model:add(nn.Linear(nstates[3], noutputs))
 
-   else
-	  error('convnet not implemented without cuda flag; see Pierre code')
-
-   end
 else
 
    error('unknown -model')
