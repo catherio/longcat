@@ -45,57 +45,74 @@ end
 
 ----------------------------------------------------------------------
 -- Validation procedure: Are we using test data, subset of training data, or cross validation?
-if opt.validation == 'test' then
-    print '==> using test dataset for validation'
-    valSet=testData
-    trainSet=trainData
-elseif opt.validation == 'sub' then
--- split trainData into valSet and the remaining trainSet
-    print '==> using subset of training for validation'
-    valsize = trsize * opt.valratio
+if trainSur==0 then
+    if opt.validation == 'test' then
+        print '==> using test dataset for validation'
+        valSet=testData
+        trainSet=trainData
+    elseif opt.validation == 'sub' then
+    -- split trainData into valSet and the remaining trainSet
+        print '==> using subset of training for validation'
+        valsize = trsize * opt.valratio
+
+        valSet={
+          data = trainData.data[{{1,valsize},{},{},{}}],
+          labels = trainData.labels[{{1,valsize}}],
+          size = function() return valsize end
+        }
+
+        trainSet={
+          data = trainData.data[{{valsize+1,-1},{},{},{}}],
+          labels = trainData.labels[{{valsize+1,-1}}],
+          size = function() return trsize-valsize end
+        }
+
+    elseif opt.validation == 'cross' then
+    -- cross validation procedure is called outside this script, here we only split
+    -- dataset once, depending on valratio and current split number
+        print '==> using cross validation'
+        if not curSplit then
+            curSplit = 0
+        end
+
+        chunk = torch.floor(trsize * 1/opt.totalSplit)
+
+    	-- fill validation set: take the nth chunk (simple slice)
+        valSet={
+          data = trainData.data[{{curSplit*chunk+1,curSplit*chunk+chunk},{},{},{}}],
+          labels = trainData.labels[{{curSplit*chunk+1,curSplit*chunk+chunk}}],
+          size = function() return chunk end
+        }
+
+    	-- fill training set. bipartite slicing is harder... just fill with
+    	-- zeroes first, then populate
+        trainSet={
+          data = torch.zeros(trsize-chunk,3,96,96),
+          labels = torch.zeros(trsize-chunk),
+          size = function() return trsize-chunk end
+        }
+
+    	-- populate the training set in two slices
+        trainSet.data[{{1,curSplit*chunk+1},{},{},{}}]=trainData.data[{{1,curSplit*chunk+1},{},{},{}}]
+        trainSet.data[{{curSplit*chunk+1,-1},{},{},{}}]=trainData.data[{{curSplit*chunk+chunk+1,-1},{},{},{}}]
+        trainSet.labels[{{1,curSplit*chunk+1}}]=trainData.labels[{{1,curSplit*chunk+1}}]
+        trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
+    end
+else
+    print '==> using subset of surrogate dataset for validation'
+    valsize = surData:size() * opt.valratio
 
     valSet={
-      data = trainData.data[{{1,valsize},{},{},{}}],
-      labels = trainData.labels[{{1,valsize}}],
+      data = surData.data[{{1,valsize},{},{},{}}],
+      labels = surData.labels[{{1,valsize}}],
       size = function() return valsize end
     }
 
     trainSet={
-      data = trainData.data[{{valsize+1,-1},{},{},{}}],
-      labels = trainData.labels[{{valsize+1,-1}}],
-      size = function() return trsize-valsize end
+      data = surData.data[{{valsize+1,-1},{},{},{}}],
+      labels = surData.labels[{{valsize+1,-1}}],
+      size = function() return surData:size()-valsize end
     }
-
-elseif opt.validation == 'cross' then
--- cross validation procedure is called outside this script, here we only split
--- dataset once, depending on valratio and current split number
-    print '==> using cross validation'
-    if not curSplit then
-        curSplit = 0
-    end
-
-    chunk = torch.floor(trsize * 1/opt.totalSplit)
-
-	-- fill validation set: take the nth chunk (simple slice)
-    valSet={
-      data = trainData.data[{{curSplit*chunk+1,curSplit*chunk+chunk},{},{},{}}],
-      labels = trainData.labels[{{curSplit*chunk+1,curSplit*chunk+chunk}}],
-      size = function() return chunk end
-    }
-
-	-- fill training set. bipartite slicing is harder... just fill with
-	-- zeroes first, then populate
-    trainSet={
-      data = torch.zeros(trsize-chunk,3,96,96),
-      labels = torch.zeros(trsize-chunk),
-      size = function() return trsize-chunk end
-    }
-
-	-- populate the training set in two slices
-    trainSet.data[{{1,curSplit*chunk+1},{},{},{}}]=trainData.data[{{1,curSplit*chunk+1},{},{},{}}]
-    trainSet.data[{{curSplit*chunk+1,-1},{},{},{}}]=trainData.data[{{curSplit*chunk+chunk+1,-1},{},{},{}}]
-    trainSet.labels[{{1,curSplit*chunk+1}}]=trainData.labels[{{1,curSplit*chunk+1}}]
-    trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
 
 end
 
@@ -109,15 +126,27 @@ end
 print '==> defining some tools'
 
 -- classes
-classes = {'1','2','3','4','5','6','7','8','9','0'}
-
+if trainSur==0 then
+    classes = {'1','2','3','4','5','6','7','8','9','0'}
+else
+    classes = {}
+    for i=1,opt.nclasses do
+        table.insert(classes,tostring(i))
+    end
+end
 -- This matrix records the current confusion across classes
 confusion = optim.ConfusionMatrix(classes)
 
 -- Log results to files
-trainLogger = optim.Logger(paths.concat(opt.save, 'train.log'))
-testLogger = optim.Logger(paths.concat(opt.save, 'test.log'))
-
+if trainSur==0 then
+    trainLogger = optim.Logger(paths.concat(opt.save, 'train.log'))
+    testLogger = optim.Logger(paths.concat(opt.save, 'test.log'))
+    modelname = 'model.net'
+else
+    trainLogger = optim.Logger(paths.concat(opt.save, 'train_sur.log'))
+    testLogger = optim.Logger(paths.concat(opt.save, 'test_sur.log'))
+    modelname = 'model_sur.net'
+end
 -- Retrieve parameters and gradients:
 -- this extracts and flattens all the trainable parameters of the mode
 -- into a 1-dim vector

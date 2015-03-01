@@ -34,17 +34,18 @@ end
 -- TODO: fix this so that it is really using the unlabeled,
 -- and is using the size parameter
 
-print '==> loading raw dataset'
-input_filename = opt.datafolder .. '/test.dat'
-loaded = torch.load(input_filename, 'ascii')
+--print '==> loading raw dataset'
+--input_filename = opt.datafolder .. '/test.dat'
+--loaded = torch.load(input_filename, 'ascii')
 
-inputData = {
-    data = loaded.X:transpose(1,2):reshape(loaded.X:size(2),3,96,96):transpose(3,4),
-    labels = loaded.y[1],
-    size = function() return 8000 end
-}
+--inputData = {
+--    data = loaded.X:transpose(1,2):reshape(loaded.X:size(2),3,96,96):transpose(3,4),
+--    labels = loaded.y[1],
+--    size = function() return 8000 end
+--}
 --inputData.data = inputData.data:double() / 255 -- this is important to make image processing work! TODO do we need to do anything about this in the real data?
-inputData.data = inputData.data:float() --Long changed this line so it's compatible with data preprocessing
+--inputData.data = inputData.data:float() --Long changed this line so it's compatible with data preprocessing
+inputData = unlabelData
 -------------------------------------------------------------------
 --
 -- Set up the surrogate generation pipeline
@@ -175,6 +176,23 @@ for class = 1,nClasses do
       end
 end
 
+-- add shuffling and demean step on newData
+for i= 1,3 do
+   -- de-mean each channel globally:
+   newData.data[{ {},i,{},{} }]:add(-newData.data[{ {},i,{},{} }]:mean())
+end
+
+--shuffling
+surData = {data=torch.zeros(newData.data:size()),
+           labels=torch.zeros(newData.labels:size()),
+           size = function() return newData:size() end
+}
+surshuffle = torch.randperm(newData:size())
+for i = 1,newData:size() do
+    surData.data[{i,{},{},{}}] = newData.data[{surshuffle[i],{},{},{}}]
+    surData.labels[i] = newData.labels[surshuffle[i]]
+end
+
 -- save full results
 filename = opt.datafolder .. '/surrogate.dat'
-torch.save(filename, newData,'ascii') --added format so we can re-load data
+torch.save(filename, surData,'ascii') --added format so we can re-load data

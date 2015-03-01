@@ -32,12 +32,19 @@ end
 print '==> define parameters'
 
 -- 10-class problem
-noutputs = 10
 
--- input dimensions
-nfeats = 3
-width = 96
-height = 96
+if trainSur==0 then
+    noutputs = 10
+    -- input dimensions
+    nfeats = 3
+    width = 96
+    height = 96
+else
+    noutputs = opt.nclasses
+    nfeats = 3
+    width = 32
+    height = 32
+end
 ninputs = nfeats*width*height
 
 -- number of hidden units (for MLP only):
@@ -49,7 +56,7 @@ filtsize = opt.filtsize
 poolsize = opt.poolsize
 stride = 1;
 padding = 0;
-normkernel = image.gaussian1D(opt.normkenelsize)
+normkernel = image.gaussian1D(opt.normkernelsize)
 
 ----------------------------------------------------------------------
 print '==> construct model'
