@@ -33,7 +33,7 @@ cmd:option('-datatransfer', 'hpc', 'how to get the data: local on hpc, or scp re
 cmd:option('-optimization', 'SGD', 'optimization method: SGD | ASGD | CG | LBFGS')
 cmd:option('-learningRate', 1e-3, 'learning rate at t=0')
 cmd:option('-batchSize', 128, 'mini-batch size (1 = pure stochastic)')
-cmd:option('-weightDecay', 0, 'weight decay (SGD only)')
+cmd:option('-weightDecay', 0.5, 'weight decay (SGD only)')
 cmd:option('-momentum', 0.998, 'momentum (SGD only)')
 cmd:option('-t0', 1, 'start averaging at t0 (ASGD only), in nb of epochs')
 cmd:option('-maxIter', 2, 'maximum nb of iterations for CG and LBFGS')
@@ -84,12 +84,11 @@ while continue do
     table.insert(aveTable.ave,aveacc)
     n=#aveTable.ave
     --apply a random criterion:
-    --at least 150 epochs, improvement < 0
-    if n >= 10 then
-        continue=false
---        ave=torch.Tensor(aveTable.ave)
---        c=ave[n]-ave[n-1]
---        if c < 0 then continue=false end
+    --at least 100 epochs, improvement < 0
+    if n >= 100 then
+        ave=torch.Tensor(aveTable.ave)
+        c=ave[n]-ave[n-1]
+        if c < 0 then continue=false end
     end
 end
 
@@ -189,8 +188,8 @@ while continue do
     table.insert(aveTable.ave,aveacc)
     n=#aveTable.ave
     --apply a random criterion:
-    --at least 150 epochs, improvement < 0
-    if n >= 150 then
+    --at least 100 epochs, improvement < 0
+    if n >= 100 then
         ave=torch.Tensor(aveTable.ave)
         c=ave[n]-ave[n-1]
         if c < 0 then continue=false end
