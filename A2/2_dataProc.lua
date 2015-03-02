@@ -142,24 +142,24 @@ for i,channel in ipairs(channels) do
 end
 
 -- Local normalization
-print '==> preprocessing data: normalize all three channels locally'
+--print '==> preprocessing data: normalize all three channels locally'
 
 -- Define the normalization neighborhood:
-neighborhood = image.gaussian1D(13)
+--neighborhood = image.gaussian1D(13)
 
 -- Define our local normalization operator (It is an actual nn module,
 -- which could be inserted into a trainable model):
-normalization = nn.SpatialContrastiveNormalization(1, neighborhood, 1):float()
+--normalization = nn.SpatialContrastiveNormalization(1, neighborhood, 1):float()
 
 -- Normalize all channels locally:
-for c in ipairs(channels) do
-   for i = 1,trainData:size() do
-      trainData.data[{ i,{c},{},{} }] = normalization:forward(trainData.data[{ i,{c},{},{} }])
-   end
-   for i = 1,testData:size() do
-      testData.data[{ i,{c},{},{} }] = normalization:forward(testData.data[{ i,{c},{},{} }])
-   end
-end
+--for c in ipairs(channels) do
+--   for i = 1,trainData:size() do
+--      trainData.data[{ i,{c},{},{} }] = normalization:forward(trainData.data[{ i,{c},{},{} }])
+--   end
+--   for i = 1,testData:size() do
+--      testData.data[{ i,{c},{},{} }] = normalization:forward(testData.data[{ i,{c},{},{} }])
+--  end
+--end
 
 ----------------------------------------------------------------------
 print '==> verify statistics'
