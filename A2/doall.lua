@@ -33,7 +33,7 @@ cmd:option('-datatransfer', 'hpc', 'how to get the data: local on hpc, or scp re
 cmd:option('-optimization', 'SGD', 'optimization method: SGD | ASGD | CG | LBFGS')
 cmd:option('-learningRate', 1e-3, 'learning rate at t=0')
 cmd:option('-batchSize', 128, 'mini-batch size (1 = pure stochastic)')
-cmd:option('-weightDecay', 0.5, 'weight decay (SGD only)')
+cmd:option('-weightDecay', 0, 'weight decay (SGD only)')
 cmd:option('-momentum', 0.998, 'momentum (SGD only)')
 cmd:option('-t0', 1, 'start averaging at t0 (ASGD only), in nb of epochs')
 cmd:option('-maxIter', 2, 'maximum nb of iterations for CG and LBFGS')
@@ -74,18 +74,18 @@ dofile '5_train.lua' --creates a function called train()
 dofile '6_test.lua' --creates a function called test()
 print '==> training surrogate dataset!'
 
-aveValacc= 0
+aveValAcc = 0
 aveTable = {ave={}}
 continue = true
 while continue do
     train()
     test()
     dofile 'saveLog.lua'
-    table.insert(aveTable.ave,aveValacc)
+    table.insert(aveTable.ave,aveValAcc)
     n=#aveTable.ave
     --apply a random criterion:
-    --at least 100 epochs, improvement < 0
-    if n >= 100 then
+    --at least 2500 epochs, improvement < 0
+    if epoch >= 2500 then
         ave=torch.Tensor(aveTable.ave)
         c=ave[n]-ave[n-1]
         if c < 0 then continue=false end
@@ -161,7 +161,7 @@ dofile '6_test.lua' --creates a function called test()
 ----------------------------------------------------------------------
 print '==> training!'
 
-aveValacc= 0
+aveValAcc= 0
 aveTable = {ave={}}
 continue = true
 while continue do
@@ -185,7 +185,7 @@ while continue do
     end
     dofile 'saveLog.lua'
 
-    table.insert(aveTable.ave,aveValacc)
+    table.insert(aveTable.ave,aveValAcc)
     n=#aveTable.ave
     --apply a random criterion:
     --at least 100 epochs, improvement < 0
