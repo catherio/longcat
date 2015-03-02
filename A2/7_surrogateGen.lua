@@ -34,18 +34,28 @@ end
 -- TODO: fix this so that it is really using the unlabeled,
 -- and is using the size parameter
 
---print '==> loading raw dataset'
---input_filename = opt.datafolder .. '/test.dat'
---loaded = torch.load(input_filename, 'ascii')
+print '==> loading raw dataset'
+input_filename = opt.datafolder .. '/unlabel.dat'
+loaded = torch.load(input_filename, 'ascii')
 
---inputData = {
---    data = loaded.X:transpose(1,2):reshape(loaded.X:size(2),3,96,96):transpose(3,4),
---    labels = loaded.y[1],
---    size = function() return 8000 end
---}
---inputData.data = inputData.data:double() / 255 -- this is important to make image processing work! TODO do we need to do anything about this in the real data?
---inputData.data = inputData.data:float() --Long changed this line so it's compatible with data preprocessing
-inputData = unlabelData
+if opt.size == 'full' then
+   print '==> using full unlabeled data, recommend use only for final testing'
+   unsize = 100000
+elseif opt.size == 'small' then
+   print '==> using reduced unlabeled data, for fast experiments'
+   unsize = 10000
+end
+
+loaded.X = loaded.X[{{},{1,unsize}}]
+
+inputData = {
+    data = loaded.X:transpose(1,2):reshape(unsize,3,96,96):transpose(3,4),
+    size = function() return unsize end
+}
+-- this is important to make image processing work!
+-- We can keep the data as double here, change the preprocessing
+inputData.data = inputData.data:double() / 255
+
 -------------------------------------------------------------------
 --
 -- Set up the surrogate generation pipeline

@@ -18,7 +18,7 @@ cmd:text()
 cmd:text('Options:')
 -- global:
 cmd:option('-seed', 1, 'fixed input seed for repeatable experiments')
-cmd:option('-threads', 2, 'number of threads')
+cmd:option('-threads', 1, 'number of threads')
 -- model:
 cmd:option('-model', 'convnet', 'type of model to construct: linear | mlp | convnet')
 cmd:option('-filtsize', 5, 'filter size, default = 5')
@@ -74,14 +74,14 @@ dofile '5_train.lua' --creates a function called train()
 dofile '6_test.lua' --creates a function called test()
 print '==> training surrogate dataset!'
 
-aveacc= 0
+aveValacc= 0
 aveTable = {ave={}}
 continue = true
 while continue do
     train()
     test()
     dofile 'saveLog.lua'
-    table.insert(aveTable.ave,aveacc)
+    table.insert(aveTable.ave,aveValacc)
     n=#aveTable.ave
     --apply a random criterion:
     --at least 100 epochs, improvement < 0
@@ -161,7 +161,7 @@ dofile '6_test.lua' --creates a function called test()
 ----------------------------------------------------------------------
 print '==> training!'
 
-aveacc= 0
+aveValacc= 0
 aveTable = {ave={}}
 continue = true
 while continue do
@@ -185,7 +185,7 @@ while continue do
     end
     dofile 'saveLog.lua'
 
-    table.insert(aveTable.ave,aveacc)
+    table.insert(aveTable.ave,aveValacc)
     n=#aveTable.ave
     --apply a random criterion:
     --at least 100 epochs, improvement < 0
