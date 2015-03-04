@@ -87,8 +87,8 @@ print '==> preprocessing data'
 
 --trainData.data = trainData.data:float()
 --testData.data = testData.data:float()
-trainData.data = trainData.data:double() / 255
-testData.data = testData.data:double() / 255
+trainData.data = trainData.data:float()
+testData.data = testData.data:float()
 
 
 -- We now preprocess the data. Preprocessing is crucial
@@ -158,7 +158,7 @@ for c in ipairs(channels) do
    end
    for i = 1,testData:size() do
       testData.data[{ i,{c},{},{} }] = normalization:forward(testData.data[{ i,{c},{},{} }])
-  end
+   end
 end
 
 ----------------------------------------------------------------------
