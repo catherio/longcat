@@ -179,8 +179,8 @@ for class = 1,nClasses do
 				  (os.date("!%X",estimate)))
 
 		 -- save partial progress while we're here
-		 partialname = opt.datafolder .. '/surrogate-partial.dat'
-		 torch.save(partialname, newData)
+--		 partialname = opt.datafolder .. '/surrogate-partial.dat'
+--		 torch.save(partialname, newData)
       end
 end
 
