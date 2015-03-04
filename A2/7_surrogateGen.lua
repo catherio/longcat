@@ -31,8 +31,6 @@ end
 
 -------------------------------------------------------------------
 --
--- TODO: fix this so that it is really using the unlabeled,
--- and is using the size parameter
 
 print '==> loading raw dataset'
 input_filename = opt.datafolder .. '/unlabel.dat'
@@ -204,5 +202,5 @@ for i = 1,newData:size() do
 end
 
 -- save full results
-filename = opt.datafolder .. '/surrogate.dat'
-torch.save(filename, surData,'ascii') --added format so we can re-load data
+--filename = opt.datafolder .. '/surrogate.dat'
+--torch.save(filename, surData,'ascii') --added format so we can re-load data

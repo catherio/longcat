@@ -70,34 +70,23 @@ if opt.model == 'linear' then
 
 elseif opt.model == 'convnet' then
 
-	  print '!!!! This has not been implemented yet!'
+      -- a typical modern convolution network (conv+relu+pool)
+      model = nn.Sequential()
 
-      if trainSur==1 then
-          -- a typical modern convolution network (conv+relu+pool)
-          model = nn.Sequential()
+      -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
+      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize, stride, stride, padding))
+      model:add(nn.ReLU())
+      model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
-          -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
-          model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize, stride, stride, padding))
-          model:add(nn.ReLU())
-          model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
-
-          -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
-          model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize, stride, stride, padding))
-          model:add(nn.ReLU())
-          model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
-      else
-          convertModel = nn.Sequential()
-          convertModel:add(model:get(1))
-          convertModel:add(model:get(2))
-          convertModel:add(model:get(3))
-          convertModel:add(model:get(4))
-          convertModel:add(model:get(5))
-          convertModel:add(model:get(6))
-          model = convertModel
-      end
+      -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
+      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize, stride, stride, padding))
+      model:add(nn.ReLU())
+      model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
       local calcDim = function(x)
-          return ((x+padding*2)-(filtsize-1))/poolsize
+      -- this equation computes the new dim of images given filtsize and padsize
+      -- this does not work for stride ~=1, or padding ~=0
+          return (x-(filtsize-1))/poolsize
       end
       -- stage 3 : standard 2-layer neural network
       newDimW = calcDim(calcDim(width))

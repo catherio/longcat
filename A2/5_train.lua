@@ -98,7 +98,7 @@ if trainSur==0 then
         trainSet.labels[{{1,curSplit*chunk+1}}]=trainData.labels[{{1,curSplit*chunk+1}}]
         trainSet.labels[{{curSplit*chunk+1,-1}}]=trainData.labels[{{curSplit*chunk+chunk+1,-1}}]
     end
-else
+else -- if trainSur==1
     print '==> using subset of surrogate dataset for validation'
     valsize = surData:size() * opt.valratio
 
