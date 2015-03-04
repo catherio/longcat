@@ -31,12 +31,24 @@ if not opt then
 end
 
 -------------------------------------------------------------------
+inputN=3 --nfeats
+inputW=96
+inputH=96
 
+patchW=32
+patchH=32
+
+outputM=128--states[3]
+outputW=inputW-patchW+1
+outputH=inputH-patchH+1
+-------------------------------------------------------------------
 
 modelname='model_sur.net'
 filename = paths.concat(opt.save, modelname)
 surmodel = torch.load(filename)
 convertModel = nn.Sequential()
+-- add this convolution layer to add the model on top of 96*96 images
+--convertModel:add(nn.SpatialConvolutionMM(inputN,inputN, patchW, patchH, 8, 8, 0))
 convertModel:add(surmodel:get(1)) --conv
 convertModel:add(surmodel:get(2)) --relu
 convertModel:add(surmodel:get(3)) --maxpool
@@ -50,49 +62,64 @@ convertModel:add(surmodel:get(10)) --relu
 
 convertModel:evaluate()
 
-inputN=3 --nfeats
-inputW=96
-inputH=96
 
-patchW=32
-patchH=32
-
-outputM=128--states[3]
-outputW=inputW-patchW+1
-outputH=inputH-patchH+1
-
-newTrain = {data=torch.Tensor(trsize,outputM,outputW,outputH),
+step=8
+newTrain = {data=torch.Tensor(trsize,outputM,math.ceil(outputW/step),math.ceil(outputH/step)),
             labels=trainData.labels,
             size = function() return trsize end
            }
-newTest = {data=torch.Tensor(tesize,outputM,outputW,outputH),
+newTest = {data=torch.Tensor(tesize,outputM,math.ceil(outputW/step),math.ceil(outputH/step)),
             labels=testData.labels,
             size = function() return tesize end
           }
 
+
 for k=1,trsize do
-    for i=1,outputW do
-        for j=1,outputH do
+    row=0
+    for i=1,outputW,step do
+        row=row+1
+        local time = sys.clock()
+        col=0
+        for j=1,outputH,step do
+            col=col+1
             local sample = trainData.data[{k,{},{i,i+patchW-1},{j,j+patchH-1}}]
             if opt.type == 'double' then sample = sample:double()
             elseif opt.type == 'cuda' then sample = sample:cuda() end
             outsample=convertModel:forward(sample)
             --if ran cuda on model, convert cuda back to double
-            newTrain.data[{k,{},i,j}] = outsample:double()
+            newTrain.data[{k,{},row,col}] = outsample:double()
         end
+
+        timeSoFar = sys.clock() - time
+        print("==> interim time to forward "..col.." patches is "..
+             (os.date("!%X",timeSoFar)))
+        estimate = timeSoFar * math.ceil(outputW/step)*trsize
+        print("    estimated time to forward "..math.ceil(outputH/step)*math.ceil(outputW/step)*trsize.." patch is "..
+             (os.date("!%X",estimate)))
     end
 end
 
 for k=1,tesize do
-    for i=1,outputW do
-        for j=1,outputH do
+    row=0
+    for i=1,outputW,step do
+        row=row+1
+        local time = sys.clock()
+        col=0
+        for j=1,outputH,step do
+            col=col+1
             local sample = testData.data[{k,{},{i,i+patchW-1},{j,j+patchH-1}}]
             if opt.type == 'double' then sample = sample:double()
             elseif opt.type == 'cuda' then sample = sample:cuda() end
             outsample=convertModel:forward(sample)
             --if ran cuda on model, convert cuda back to double
-            newTest.data[{k,{},i,j}] = outsample:double()
+            newTest.data[{k,{},row,col}] = outsample:double()
         end
+        timeSoFar = sys.clock() - time
+        print("==> interim time to forward "..col.." patches is "..
+             (os.date("!%X",timeSoFar)))
+        estimate = timeSoFar * math.ceil(outputW/step)*tesize
+        print("    estimated time to forward "..math.ceil(outputH/step)*math.ceil(outputW/step)*trsize.." patch is "..
+             (os.date("!%X",estimate)))
     end
 end
 
@@ -109,6 +136,6 @@ testData=newTest
 print '==>constructing simple linear model for supervised learning'
 model = nn.Sequential()
 --CHANGE P, CHANGE POOL SIZE TO BECOME 1/2
-model:add(nn.SpatialMaxPooling(torch.floor(outputW/2),torch.floor(outputH/2),torch.floor(outputW/2),torch.floor(outputH/2)))
+model:add(nn.SpatialMaxPooling(torch.floor(math.ceil(outputW/step)/2),torch.floor(math.ceil(outputH/step)/2),torch.floor(math.ceil(outputW/step)/2),torch.floor(math.ceil(outputH/step)/2)))
 model:add(nn.Reshape(outputM*2*2))
 model:add(nn.Linear(outputM*2*2,10))
