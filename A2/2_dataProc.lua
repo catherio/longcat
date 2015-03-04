@@ -36,8 +36,8 @@ end
 -- mattorch package allows 1-to-1 conversion between Torch and Matlab
 -- files.
 
-train_file = opt.datafolder .. '/train.dat'
-test_file = opt.datafolder .. '/test.dat'
+train_file = paths.concat(opt.datafolder,'train.dat')
+test_file = paths.concat(opt.datafolder,'test.dat')
 
 
 ----------------------------------------------------------------------

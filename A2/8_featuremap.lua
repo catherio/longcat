@@ -73,7 +73,7 @@ newTest = {data=torch.Tensor(tesize,outputM,outputW,outputH),
 for k=1,trsize do
     for i=1,outputW do
         for j=1,outputH do
-            local sample = trainData.data[{k,{},{(i-1)*patchW+1,(i-1)*patchW+patchW},{(j-1)*patchH+1,(j-1)*patchH+patchH}}]
+            local sample = trainData.data[{k,{},{i,i+patchW-1},{j,j+patchH-1}}]
             if opt.type == 'double' then sample = sample:double()
             elseif opt.type == 'cuda' then sample = sample:cuda() end
             outsample=convertModel:forward(sample)
@@ -86,7 +86,7 @@ end
 for k=1,tesize do
     for i=1,outputW do
         for j=1,outputH do
-            local sample = testData.data[{k,{},{(i-1)*patchW+1,(i-1)*patchW+patchW},{(j-1)*patchH+1,(j-1)*patchH+patchH}}]
+            local sample = testData.data[{k,{},{i,i+patchW-1},{j,j+patchH-1}}]
             if opt.type == 'double' then sample = sample:double()
             elseif opt.type == 'cuda' then sample = sample:cuda() end
             outsample=convertModel:forward(sample)
