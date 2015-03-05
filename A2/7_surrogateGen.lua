@@ -52,7 +52,7 @@ inputData = {
 }
 -- this is important to make image processing work!
 -- We can keep the data as double here, change the preprocessing
-inputData.data = inputData.data:double() / 255
+inputData.data = inputData.data:float() / 255
 
 -------------------------------------------------------------------
 --
