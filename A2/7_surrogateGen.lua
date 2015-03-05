@@ -43,8 +43,8 @@ inputData = {
     labels = loaded.y[1],
     size = function() return 8000 end
 }
-inputData.data = inputData.data:double() / 255 -- this is important to make image processing work! TODO do we need to do anything about this in the real data?
-
+--inputData.data = inputData.data:double() / 255 -- this is important to make image processing work! TODO do we need to do anything about this in the real data?
+inputData.data = inputData.data:float() --Long changed this line so it's compatible with data preprocessing
 -------------------------------------------------------------------
 --
 -- Set up the surrogate generation pipeline
@@ -90,43 +90,43 @@ function makeExemplars(im, fullres, smallres, nExemplars)
         -- scaling: 0.7 to 1.4
         toscale = fullres * (math.random()*0.7 + 0.7);
         temp = image.scale(im, toscale, toscale)
-        
+
         -- rotation: up to 20 degrees, i.e 0.35 radians
         torotate = math.random()*0.7 - 0.35
         temp = image.rotate(im, torotate)
-        
+
         -- convert to HSV for the next transformations
         temp = image.rgb2hsv(temp)
-        
+
         -- contrast 1: not implemented, requires PCA
-        
+
         -- contrast 2: convert to HSV; raise S and V to a power between 0.25 and 4 (edit: 3);
         -- multiply by 0.7 through 1.4; add -0.1 to 0.1
         topow = math.random() * 2.75 + 0.25
         tomul = math.random() * 0.7 + 0.7
         toadd = math.random() * 0.2 - 0.1
         temp[{2,{},{}}] = torch.mul(torch.pow(temp[{2,{},{}}], topow), tomul) + toadd
-         
+
         topow = math.random() * 2.75 + 0.25
         tomul = math.random() * 0.7 + 0.7
         toadd = math.random() * 0.2 - 0.1
         temp[{3,{},{}}] = torch.mul(torch.pow(temp[{3,{},{}}], topow), tomul) + toadd
-        
+
         -- hue: add a value between -0.1 and 0.1 to the hue
         toadd = math.random() * 0.2 - 0.1
         temp[{1,{},{}}] = temp[{1,{},{}}] + toadd
         temp[{1,{},{}}]:apply(wrapZeroOne)
-    
+
         -- convert back to RGB
         temp = image.hsv2rgb(temp)
-        
+
         -- translation: within 0.2 of the patch size
         xpatch = torch.round(xseed + (math.random()*0.4 - 0.2)*smallres)
         ypatch = torch.round(yseed + (math.random()*0.4 - 0.2)*smallres)
-        
+
         exemplars[{{i}, {}, {}, {}}] = image.crop(temp, xpatch-smallres/2, ypatch-smallres/2, xpatch+smallres/2, ypatch+smallres/2)
     end
-    
+
     return exemplars
 end
 
@@ -142,7 +142,7 @@ smallres = 32
 
 newData = {
     data = torch.DoubleTensor(nClasses*nExemplars, 3, smallres, smallres),
-    labels = torch.DoubleTensor(nClasses*nExemplars),    
+    labels = torch.DoubleTensor(nClasses*nExemplars),
     size = function() return nClasses*nExemplars end
 }
 
@@ -158,14 +158,14 @@ for class = 1,nClasses do
     -- choose a seed image
     imnum = math.random(1, inputData.size())
     im = inputData.data[{imnum, {}, {}, {}}]
-    
+
     -- generate patches
     newData.data[{{idx,idx+nExemplars-1}, {}, {}, {}}] = makeExemplars(im, fullres, smallres, nExemplars)
-    
+
     -- set class labels
     newData.labels[{{idx,idx+nExemplars-1}}] = class
         -- slicing takes one index or list *per dimension*, so need a list of one list
-    
+
     -- advance the index
     idx = idx + nExemplars
 
@@ -186,4 +186,4 @@ end
 
 -- save full results
 filename = opt.datafolder .. '/surrogate.dat'
-torch.save(filename, newData)
+torch.save(filename, newData,'ascii') --added format so we can re-load data
