@@ -61,20 +61,29 @@ end
 function makeExemplars(im, fullres, smallres, nExemplars)
 -- the real heart of it. Creates n exemplars using a patch from the
 -- provided image, and many transformations applied
- 
+
     mx = (smallres/2)*math.sqrt(2) -- needs to be centered further in,
         -- so that rotation doesn't lead to black spaces forming
-    
-    -- choose center of seed patch
-    xseed = math.random(mx, fullres-mx)
-    yseed = math.random(mx, fullres-mx)
-        -- note: math.random with two args gives integers (useful
-	    -- for pixel positions) whereas without args it gives
-	    -- continuous numbers from 0 to 1
-    
-    -- seed = image.crop(im, xseed-smallres/2, yseed-smallres/2, xseed+smallres/2, yseed+smallres/2)
-    -- itorch.image(seed) -- uncomment to visualize in notebook
-    
+
+    vertkern = torch.Tensor({{1},{0},{-1}}) -- for checking sufficient gradient
+    horzkern = torch.Tensor({{1, 0, -1}})
+        
+    score = 0
+    gradthresh = 700
+    while score < gradthresh do
+        -- choose center of seed patch
+        xseed = math.random(mx, fullres-mx)
+        yseed = math.random(mx, fullres-mx)
+            -- note: math.random with two args gives integers (useful for pixel positions)
+            -- whereas without args it gives continuous numbers from 0 to 1
+        
+        seed = image.crop(im, xseed-smallres/2, yseed-smallres/2, xseed+smallres/2, yseed+smallres/2)
+        
+        vertgrad = image.convolve(seed, vertkern, 'same')
+        horzgrad = image.convolve(seed, horzkern, 'same')
+        score = vertgrad:abs():sum()  + horzgrad:abs():sum()
+    end
+
     -- make modifications to the image
     exemplars = torch.DoubleTensor(nExemplars, 3, smallres, smallres)
     for i = 1,nExemplars do
