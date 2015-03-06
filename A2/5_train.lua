@@ -100,7 +100,7 @@ if trainSur==0 then
     end
 else -- if trainSur==1
     print '==> using subset of surrogate dataset for validation'
-    valsize = surData:size() * opt.valratio
+    valsize = surData.data:size(1) * opt.valratio
 
     valSet={
       data = surData.data[{{1,valsize},{},{},{}}],
@@ -111,7 +111,7 @@ else -- if trainSur==1
     trainSet={
       data = surData.data[{{valsize+1,-1},{},{},{}}],
       labels = surData.labels[{{valsize+1,-1}}],
-      size = function() return surData:size()-valsize end
+      size = function() return surData.data:size(1)-valsize end
     }
 
 end
