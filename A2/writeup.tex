@@ -57,8 +57,8 @@ $128*46*46$ produced form the 128 filter banks and a maxpooling operation.
 Layer Two had a filter bank of 128 convolved over the output of Layer One.  The
 output of each neuron in Layer One and Layer Two was additionally passed
 through a piecewise linear rectifier, in which negative values were mapped to
-0. Layer Three was a fully connected linear layer with a single linear output
-neuron.  
+0. Layer Three was a fully connected linear layer with a ten linear output
+nodes, one for each image class. 
 
 \subsection{Training}
 
