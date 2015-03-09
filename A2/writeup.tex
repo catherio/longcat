@@ -10,6 +10,13 @@
 \usepackage{natbib}
 \usepackage{fullpage}
 
+\newenvironment{itemizedense}{
+\begin{itemize}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
 \begin{document} \maketitle
 
 \section*{Summary of Strategies}
@@ -18,7 +25,7 @@ Overall, we implemented two main strategies: one basic supervised-learning strat
 
 \section{Supervised-only network}
 
-\subsection*{Preprocessing}
+\subsubsection*{Preprocessing}
 
 TODO totally unchanged, fix this!
 
@@ -33,13 +40,13 @@ each channel, and dividing by the standard deviation (zscore), for the train
 data. We then used this mean and standard deviation to transform the test data
 (to keep training and testing data separate).
 
-\subsection*{Architecture}
+\subsubsection*{Architecture}
 
 The input size is 3 color channels, and 96-by-96 pixels. 
 
 TODO remaining layers
 
-\subsection*{Learning Techniques and Training Procedure}
+\subsubsection*{Learning Techniques and Training Procedure}
 No data augmentations were used beyond the standard preprocessing. We used a dropout probability of 0.5 on the third layer.
 
 We used standard stochastic gradient descent, since the optimization problem is
@@ -47,12 +54,12 @@ non-convex for our architecture. We used the following parameter values:
 
 TODO check that the following are right
 
-\begin{itemize}
+\begin{itemizedense}
 \item Learning Rate $1 \times 10^{-7}$
 \item Momentum of $0$
 \item Loss function: negative log likelihood (nll)
 \item TODO train/validation
-\end{itemize}
+\end{itemizedense}
 
 \subsection*{Results}
 
@@ -72,49 +79,60 @@ First, candidate seed patches were screened for having enough variation in inten
 
 Second, we generated $nExemplars$ transformed patches by randomly applying the following transformations:
 
-\begin{itemize}
+\begin{itemizedense}
 \item Rotation: up to 20 degrees, i.e. 0.35 radians.
 \item Contrast: Raise the S and V components to a power between 0.25 and 3; multiply by 0.7 through 1.4; add -0.1 to 0.1.
 \item Hue: add a value between -0.1 and 0.1
 \item Translation: within 0.2 of the patch size
-\end{itemize}
+\end{itemizedense}
 
 We did not implement the PCA-based contrast transformation described in Dostovitskiy et al, because it was more complicated to implement. We also removed the scaling transformation described in Dostovitskiy et al. simply because it was buggy and causing problems, and we did not have time to fix it before submission. We believe our results would have been more robust and our filters more scale-invariant if we had succeeded at implementing the scale transformation.
 
 We experimented with using surrogate datasets with TODO RANGE N surrogate classes, each with TODO RANGE M exemplars. TODO what did we find?
 
-\subsubsection*{Feature representation training}
-The input of the The output of the unsupervised feature learning stage is a network which turns 32x32 iamge patches.
+TODO figure here of image patches
 
-TODO graphic here of image patches
+\subsubsection*{Feature representation training}
+The input of the feature representation training step is a surrogate dataset of $nClasses$ generated classes, each with $nExemplars$ images (32x32) derived from each class' seed patch.
+
+Preprocessing TODO. Architecture TODO. 
+
+We used a dropout probability of 0.5 on the third layer. We used standard stochastic gradient descent, with the following parameter values:
+
+\begin{itemizedense}
+\item Learning Rate $1 \times 10^{-3}$
+\item Momentum of $0$
+\item Weight decay of $0$
+\item Loss function: negative log likelihood (nll)
+\item Training set is 75\% of the data; validation set is a random 25\%
+\end{itemizedense}
+
+We implemented the ability to perform ten-fold cross-validation, but did not use it much for model selection because it proved to be very slow.
 
 \subsection*{Step 2: Supervised classification}
 
-\subsection*{Preprocessing}
+\subsection*{Feature representation transformation}
 
-\subsection*{Architecture}
+TODO explain how to use the 32x32 module to transform to a new feature representation
 
-The input size is 3 color channels, and 96-by-96 pixels. 
+\subsection*{Supervised training}
 
-TODO remaining layers
+Preprocessing TODO. Architecture TODO.
 
-\subsection*{Learning Techniques and Training Procedure}
-No data augmentations were used beyond the standard preprocessing. We used a dropout probability of 0.5 on the third layer.
+We used a dropout probability of 0.5 on the third layer. We used standard stochastic gradient descent, with the following parameter values:
 
-We used standard stochastic gradient descent, since the optimization problem is
-non-convex for our architecture. We used the following parameter values:
-
-TODO check that these are right
-
-\begin{itemize}
-\item Learning Rate $1 \times 10^{-7}$
+\begin{itemizedense}
+\item Learning Rate $1 \times 10^{-3}$
 \item Momentum of $0$
+\item Weight decay of $0$
 \item Loss function: negative log likelihood (nll)
-\item TODO train/validation
-\end{itemize}
+\item Training set is 75\% of the data; validation set is a random 25\%
+\end{itemizedense}
 
 \subsection*{Results}
 
 TODO fill in results!
+
+Any conditions/variations we tried? How did they do?
 
 \end{document}
