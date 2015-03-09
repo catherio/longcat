@@ -36,14 +36,35 @@ Overall, we implemented two main strategies: one basic supervised-learning strat
 
 \section{Supervised-only network}
 
+\subsection{Preprocessing}
+
+We normalized each feature globally, by subtracting the global mean for each
+channel, and dividing by the standard deviation (zscore), for the train data.
+We then used this mean and standard deviation to transform the test data
+separately. The training data was then subdivided into ten training and validation
+pairs. 
+
 \subsection{Architecture}
-TODO update this!
 
-The input size is 3 color channels, and $96\times96$ pixels. 
-
-TODO remaining layers
+We used the 'convnet' and 'cuda' arguments to the provided code. This produces
+a model with two stages of convolutional filter-nonlinear-pooling architecture,
+followed by a standard 2-layer neural network. The input layer contained
+$96*96*3$ neurons, one per pixel and RGB value. Layer One has 128 convolutional
+filter banks of size 5 pixels by 5 pixels by 3 RGB values, where each bank
+convolutionally represents one neuron per input pixel with the same
+filters/weights shared by each unit, which creates. Layer Two had an input of
+$128*46*46$ produced form the 128 filter banks and a maxpooling operation.
+Layer Two had a filter bank of 128 convolved over the output of Layer One.  The
+output of each neuron in Layer One and Layer Two was additionally passed
+through a piecewise linear rectifier, in which negative values were mapped to
+0. Layer Three was a fully connected linear layer with a single linear output
+neuron.  
 
 \subsection{Training}
+
+momentum 0.998
+weight decay 0
+train/validation/test split
 
 TODO verify that the following is true!
 We preprocessed the images by subtracting the global mean for each channel, and dividing by the standard deviation (zscore), for the train data. We then used this mean and standard deviation to transform the test data (to keep training and testing data separate).
@@ -54,15 +75,13 @@ TODO check that the following are right
 
 \begin{itemizedense}
 \item Learning Rate $1 \times 10^{-7}$
-\item Momentum of $0.998$
+\item Momentum of $0$
 \item Weight decay of $0$
 \item Loss function: negative log likelihood (nll)
 \item TODO train/validation split
 \end{itemizedense}
 
 \subsection{Results}
-
-TODO submit results!
 
 \section{Unsupervised feature-learning network}
 \subsection{Overview of approach}
