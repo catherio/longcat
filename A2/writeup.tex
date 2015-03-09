@@ -111,6 +111,8 @@ We experimented with using surrogate datasets with TODO RANGE N surrogate classe
 \caption{A selection of exemplars from three surrogate classes}
 \end{figure}
 
+TODO reference figure in text
+
 \subsubsection{Feature representation training}
 The input of the feature representation training step is a surrogate dataset of $n$ generated classes, each with $m$ images (32x32) derived from each class' seed patch.
 
@@ -129,6 +131,14 @@ We used stochastic gradient descent, with the following parameter values:
 \end{itemizedense}
 
 We implemented the ability to perform ten-fold cross-validation, but did not use it for model selection because it proved to be very slow.
+
+TODO figure reference
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figs/filter_sur.png}
+\caption{The learned layer-1 filters}
+\end{figure}
+
 
 \subsection{Step 2: Supervised classification}
 
