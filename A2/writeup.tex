@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{natbib}
 
 \newenvironment{itemizedense}{
 \begin{itemize}
@@ -36,7 +37,7 @@ However, there are massively many more unlabeled images readily available. To
 evaluate the utility of unlabeled datasets to improve classiication performance
 on labeld images, we implemented two main strategies: one basic
 supervised-learning strategy, and one unsupervised-feature-learning strategy
-based on Dosovitskiy et al, which performed best at $54.4\%$.
+based on Dosovitskiy et al \cite{dos}, which performed best at $54.4\%$ compared with $48\%$ for the standard supervised-only convolutional net.
 \end{abstract}
 
 \section{Supervised-only network}
@@ -52,7 +53,7 @@ nodes, respectively. The standard two-layer net was a fully connected linear
 layer with a ten linear output nodes, one for each image class, optimized with
 stochastic gradient descent and a negative log-likelihood loss function. We
 used a dropout probably $0.5$, momentum $0.998$, weight decay $0$, and a
-learning rate of $10^{-3}$.
+learning rate of $10^{-3}$. This network performed at $48\%$ on the test set. 
 
 \section{Unsupervised feature-learning network}
 \subsection{Overview of approach}
@@ -143,4 +144,9 @@ The architecture we used at this stage was a simple linear layer (Dosovitskiy et
 Overall, the highest performance we achieved was $54.4\%$ - however, this was on only 75\% of the data, because we did not get a chance to do a final pass with no validation set before the deadline. We will submit our final performance as soon as we are able.
 
 To comment briefly on the effect of some choices we made: Adding the gradient cutoff in patch selection substantially improved our performance (from approximately 40\% to approximately 48\% on the validation set at the time we chose to include it). Also, we initially chose 128 filters per layer for all three layers in the unsupervised stage. When we increased the dimensionality of the layers to 128, 256, and 512, our performance improved (from approximately 48\% to approximately 53\% on the validation set).
+
+\bibliographystyle{unsrt}
+\bibliography{writeup}
+
+
 \end{document}

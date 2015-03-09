@@ -1,0 +1,10 @@
+\begin{thebibliography}{1}
+
+\bibitem{dos}
+Alexey Dosovitskiy, Jost~Tobias Springenberg, Martin Riedmiller, and Thomas
+  Brox.
+\newblock Discriminative unsupervised feature learning with convolutional
+  neural networks.
+\newblock {\em CoRR}, abs/1406.6909, 2014.
+
+\end{thebibliography}
