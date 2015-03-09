@@ -2,6 +2,9 @@
 \usepackage{nips14submit_e,times}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \newenvironment{itemizedense}{
 \begin{itemize}
@@ -90,7 +93,24 @@ We did not implement the PCA-based contrast transformation described in Dostovit
 
 We experimented with using surrogate datasets with TODO RANGE N surrogate classes, each with TODO RANGE M exemplars. TODO what did we find?
 
-TODO figure here of image patches
+\begin{figure}[h]
+\centering
+\begin{subfigure}{0.3\textwidth}
+  \centering
+          \includegraphics[width=\textwidth]{figs/patch_firetruck.png}
+          \label{fig1}
+\end{subfigure}
+\begin{subfigure}{0.3\textwidth}
+  \centering
+          \includegraphics[width=\textwidth]{figs/patch_plane.png}
+          \label{fig1}
+\end{subfigure}
+\begin{subfigure}{0.3\textwidth}
+  \centering
+          \includegraphics[width=\textwidth]{figs/patch_horse.png}
+          \label{fig1}
+\end{subfigure}
+\end{figure}
 
 \subsubsection{Feature representation training}
 The input of the feature representation training step is a surrogate dataset of $n$ generated classes, each with $m$ images (32x32) derived from each class' seed patch.
