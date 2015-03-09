@@ -42,7 +42,7 @@ We normalized each feature globally, by subtracting the global mean for each
 channel, and dividing by the standard deviation (zscore), for the train data.
 We then used this mean and standard deviation to transform the test data
 separately. The training data was then subdivided into ten training and validation
-pairs. 
+pairs. No data augmentation for this network were used. 
 
 \subsection{Architecture}
 
@@ -62,24 +62,9 @@ neuron.
 
 \subsection{Training}
 
-momentum 0.998
-weight decay 0
-train/validation/test split
-
-TODO verify that the following is true!
-We preprocessed the images by subtracting the global mean for each channel, and dividing by the standard deviation (zscore), for the train data. We then used this mean and standard deviation to transform the test data (to keep training and testing data separate).
-
-No data augmentations were used. We used a dropout probability of 0.5 on the third layer. We used stochastic gradient descent with the following parameter values:
-
-TODO check that the following are right
-
-\begin{itemizedense}
-\item Learning Rate $1 \times 10^{-7}$
-\item Momentum of $0$
-\item Weight decay of $0$
-\item Loss function: negative log likelihood (nll)
-\item TODO train/validation split
-\end{itemizedense}
+We trained the network with stochastic gradient descent and a negative
+log-likelihood loss function. Additionally, we used a dropout probably 0.5,
+momentum 0.998, weight decay 0, and a learning rate of $1e-3$.
 
 \subsection{Results}
 
