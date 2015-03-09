@@ -31,9 +31,7 @@ Catherine Olsson, Long Sha, and Kevin Brown \\
 \maketitle
 
 \begin{abstract}
-Overall, we implemented two main strategies: one basic supervised-learning
-strategy, and one unsupervised-feature-learning strategy based on Dosovitskiy
-et al. TODO REFERENCE. TODO what performance was achieved with each?
+Overall, we implemented two main strategies: one basic supervised-learning strategy, and one unsupervised-feature-learning strategy based on Dosovitskiy et al. TODO REFERENCE. TODO what performance was achieved with each?
 \end{abstract}
 
 \section{Supervised-only network}
@@ -56,7 +54,7 @@ TODO check that the following are right
 
 \begin{itemizedense}
 \item Learning Rate $1 \times 10^{-7}$
-\item Momentum of $0$
+\item Momentum of $0.998$
 \item Weight decay of $0$
 \item Loss function: negative log likelihood (nll)
 \item TODO train/validation split
@@ -67,7 +65,6 @@ TODO check that the following are right
 TODO submit results!
 
 \section{Unsupervised feature-learning network}
-
 \subsection{Overview of approach}
 
 The unsupervised feature-learning approach proceeds in two steps. The first step is to learn a feature representation from the unlabeled data. This is achieved by generating ``surrogate classes'', each consisting of a single image patch with various distortions applied, and then training a network to discriminate these surrogate classes. The second step is to train a classifier on the true labeled data, after first transforming the labeled images to the new feature representation.
@@ -89,29 +86,27 @@ Second, we generated $m$ transformed patches by randomly applying the following 
 \item Translation: within 0.2 of the patch size
 \end{itemizedense}
 
-We did not implement the PCA-based contrast transformation described in Dostovitskiy et al, because it was more complicated to implement. We also removed the scaling transformation described in Dostovitskiy et al. simply because it was buggy and causing problems, and we did not have time to fix it before submission. We believe our results would have been more robust and our filters more scale-invariant if we had succeeded at implementing the scale transformation. We also added a left-right flip, which unfortunately was not quite correctly implemented; implementing this correctly may have gained us even better performance.
+We did not implement the PCA-based contrast transformation described in Dostovitskiy et al, because it was more complicated to implement. We also removed the scaling transformation described in Dostovitskiy et al. simply because it was buggy and causing problems, and we did not have time to fix it before submission. We believe our results would have been more robust and our filters more scale-invariant if we had succeeded at implementing the scale transformation. We also added a left-right flip, which unfortunately was not quite correctly implemented in that we applied it before extracting the patch rather than after; implementing this correctly may have gained us even better performance. Example patches drawn from three surrogate classes can be seen in Figure~\ref{figpatch}.
 
-We experimented with using surrogate datasets with TODO RANGE N surrogate classes, each with TODO RANGE M exemplars. Consistent with the graphs in the original paper, we found that including more classes and more exemplars improved performance. However, the total number of classes and exemplars we were able to use was ultimately restricted by memory limitations in our current implementation. We settled on TODO N classes and TODO M exemplars for our final analysis.
+We experimented with using surrogate datasets with up to a number of surrogate classes ranging from 20 to 2000, each with 100 exemplars. Consistent with the the original paper, we found that including more classes improved performance; we did not vary the number of exemplars because 100 was shown to be sufficient in the paper. However, the total number of classes we were able to use was ultimately restricted by memory limitations in our current implementation. We could have used more classes if we did not load all the classes onto the GPU at once. We used the practical upper limit of 2000 classes and 100 exemplars for our final analysis. 
 
 \begin{figure}[h]
 \centering
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.25\textwidth}
   \centering
   \includegraphics[width=\textwidth]{figs/patch_noflip_lines.png}
 \end{subfigure}
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.25\textwidth}
   \centering
   \includegraphics[width=\textwidth]{figs/patch_noflip_lemur.png}
 \end{subfigure}
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.25\textwidth}
   \centering
   \includegraphics[width=\textwidth]{figs/patch_noflip_boattop.png}
 \end{subfigure}
-\label{figpatch}
 \caption{A selection of exemplars from three surrogate classes}
+\label{figpatch}
 \end{figure}
-
-TODO reference figure in text
 
 \subsubsection{Feature representation training}
 The input of the feature representation training step is a surrogate dataset of $n$ generated classes, each with $m$ images (32x32) derived from each class' seed patch.
@@ -132,11 +127,13 @@ We used stochastic gradient descent, with the following parameter values:
 
 We implemented the ability to perform ten-fold cross-validation, but did not use it for model selection because it proved to be very slow.
 
-TODO figure reference
+The learned first-layer filters from the unsupervised feature-learning step can be visualized in Figure~\ref{figfilt}.
+
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{figs/filter_sur.png}
+\includegraphics[width=0.5\textwidth]{figs/filter_sur.png}
 \caption{The learned layer-1 filters}
+\label{figfilt}
 \end{figure}
 
 
@@ -161,7 +158,7 @@ We used a dropout probability of 0.5 on the third layer. We used standard stocha
 
 \begin{itemizedense}
 \item Learning Rate $1 \times 10^{-3}$
-\item Momentum of $0$
+\item Momentum of $0.998$
 \item Weight decay of $0$
 \item Loss function: negative log likelihood (nll)
 \item Training set is 75\% of the data; validation set is a random 25\%
