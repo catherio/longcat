@@ -52,25 +52,24 @@ set. No data augmentation for this network were used.
 
 \subsection{Architecture}
 
-We used the 'convnet' and 'cuda' arguments to the provided code. This produces
-a model with two stages of convolutional filter-nonlinear-pooling architecture,
-followed by a standard 2-layer neural network. The input layer contained
-$96*96*3$ neurons, one per pixel and RGB value. Layer One has 128 convolutional
-filter banks of size 5 pixels by 5 pixels by 3 RGB values, where each bank
-convolutionally represents one neuron per input pixel with the same
-filters/weights shared by each unit, which creates. Layer Two had an input of
-$128*46*46$ produced form the 128 filter banks and a maxpooling operation.
-Layer Two had a filter bank of 128 convolved over the output of Layer One.  The
-output of each neuron in Layer One and Layer Two was additionally passed
-through a piecewise linear rectifier, in which negative values were mapped to
-0. Layer Three was a fully connected linear layer with a ten linear output
-nodes, one for each image class. 
+We created a convolutional neural net with two stages of convolutional
+filter-nonlinear-pooling architecture, followed by a standard two-layer neural
+network. The input layer contained $96*96*3$ neurons, one per pixel and RGB
+value. Layer One has $128$ convolutional filter banks of size $5$ pixels by $5$
+pixels by three RGB values, where each bank convolutionally represents one neuron
+per input pixel with the same filters/weights shared by each unit, which
+creates. Layer Two had an input of $128*46*46$ produced form the 128 filter
+banks and a maxpooling operation.  Layer Two had a filter bank of 128 convolved
+over the output of Layer One.  The output of each neuron in Layer One and Layer
+Two was additionally passed through a piecewise linear rectifier, in which
+negative values were mapped to 0. Layer Three was a fully connected linear
+layer with a ten linear output nodes, one for each image class. 
 
 \subsection{Training}
 
 We trained the network with stochastic gradient descent and a negative
-log-likelihood loss function. Additionally, we used a dropout probably 0.5,
-momentum 0.998, weight decay 0, and a learning rate of $1e-3$.
+log-likelihood loss function. Additionally, we used a dropout probably $0.5$,
+momentum $0.998$, weight decay 0, and a learning rate of $1e-3$.
 
 \subsection{Results}
 
