@@ -33,8 +33,11 @@ if not opt then
 end
 
 -- 10-class problem
-noutputs = 10
-
+if trainSur==0 then
+    noutputs = 10
+else
+    noutputs = opt.nclasses
+end
 ----------------------------------------------------------------------
 print '==> define loss'
 

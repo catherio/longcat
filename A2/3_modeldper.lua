@@ -51,7 +51,7 @@ ninputs = nfeats*width*height
 nhiddens = ninputs / 2
 
 -- hidden units, filter sizes (for ConvNet only):
-nstates = {128,128,128}
+nstates = {64,128,256,128}
 filtsize = opt.filtsize
 poolsize = opt.poolsize
 stride = 1;
@@ -83,19 +83,24 @@ elseif opt.model == 'convnet' then
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
 
+      -- stage 3 : filter bank -> squashing -> L2 pooling -> normalization
+      model:add(nn.SpatialConvolutionMM(nstates[2], nstates[3], filtsize, filtsize, stride, stride, padding))
+      model:add(nn.ReLU())
+      model:add(nn.SpatialMaxPooling(poolsize,poolsize,poolsize,poolsize))
+
       local calcDim = function(x)
       -- this equation computes the new dim of images given filtsize and padsize
       -- this does not work for stride ~=1, or padding ~=0
-          return (x-(filtsize-1))/poolsize
+          return math.floor((x-(filtsize-1))/poolsize)
       end
       -- stage 3 : standard 2-layer neural network
-      newDimW = calcDim(calcDim(width))
-      newDimH = calcDim(calcDim(height))
-      model:add(nn.View(nstates[2]*newDimW*newDimH))
+      newDimW = calcDim(calcDim(calcDim(width)))
+      newDimH = calcDim(calcDim(calcDim(height)))
+      model:add(nn.View(nstates[3]*newDimW*newDimH))
       model:add(nn.Dropout(0.5))
-      model:add(nn.Linear(nstates[2]*newDimW*newDimH, nstates[3]))
+      model:add(nn.Linear(nstates[3]*newDimW*newDimH, nstates[4]))
       model:add(nn.ReLU())
-      model:add(nn.Linear(nstates[3], noutputs))
+      model:add(nn.Linear(nstates[4], noutputs))
 
 else
 

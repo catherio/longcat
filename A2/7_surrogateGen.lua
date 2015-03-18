@@ -21,30 +21,40 @@ if not opt then
    cmd:text('STL-10 Dataset Preprocessing')
    cmd:text()
    cmd:text('Options:')
-   cmd:option('-size', 'small', 'how many unlabeled samples do we load: small | full')
+   cmd:option('-size', 'full', 'how many unlabeled samples do we load: small | full')
    cmd:option('-datafolder', 'dataset', 'subdirectory where dataset is saved')
-   cmd:option('-nclasses', 20, 'how many surrogate classes do we create, default = 5')
-   cmd:option('-nexemplars', 100, 'how many exemplars in each surrogate class, default = 10')
+   cmd:option('-nclasses', 8000, 'how many surrogate classes do we create, default = 5')
+   cmd:option('-nexemplars', 150, 'how many exemplars in each surrogate class, default = 10')
+   cmd:option('-savedata', 1, 'If this code runs by itself, we savedata')
    cmd:text()
    opt = cmd:parse(arg or {})
 end
 
 -------------------------------------------------------------------
 --
--- TODO: fix this so that it is really using the unlabeled,
--- and is using the size parameter
 
 print '==> loading raw dataset'
-input_filename = opt.datafolder .. '/test.dat'
+input_filename = opt.datafolder .. '/unlabel.dat'
 loaded = torch.load(input_filename, 'ascii')
 
+if opt.size == 'full' then
+   print '==> using full unlabeled data, recommend use only for final testing'
+   unsize = 100000
+elseif opt.size == 'small' then
+   print '==> using reduced unlabeled data, for fast experiments'
+   unsize = 30000
+end
+
+loaded.X = loaded.X[{{},{1,unsize}}]
+
 inputData = {
-    data = loaded.X:transpose(1,2):reshape(loaded.X:size(2),3,96,96):transpose(3,4),
-    labels = loaded.y[1],
-    size = function() return 8000 end
+    data = loaded.X:transpose(1,2):reshape(unsize,3,96,96):transpose(3,4),
+    size = function() return unsize end
 }
---inputData.data = inputData.data:double() / 255 -- this is important to make image processing work! TODO do we need to do anything about this in the real data?
-inputData.data = inputData.data:float() --Long changed this line so it's compatible with data preprocessing
+-- this is important to make image processing work!
+-- We can keep the data as double here, change the preprocessing
+inputData.data = inputData.data:float() / 255
+
 -------------------------------------------------------------------
 --
 -- Set up the surrogate generation pipeline
@@ -67,67 +77,76 @@ function makeExemplars(im, fullres, smallres, nExemplars)
 
     vertkern = torch.Tensor({{1},{0},{-1}}) -- for checking sufficient gradient
     horzkern = torch.Tensor({{1, 0, -1}})
-        
+
     score = 0
-    gradthresh = 700
-    while score < gradthresh do
+    gradthresh = 600
+    countGrad=0
+    while (score < gradthresh and countGrad<100) do
         -- choose center of seed patch
+        countGrad=countGrad+1
         xseed = math.random(mx, fullres-mx)
         yseed = math.random(mx, fullres-mx)
             -- note: math.random with two args gives integers (useful for pixel positions)
             -- whereas without args it gives continuous numbers from 0 to 1
-        
+
         seed = image.crop(im, xseed-smallres/2, yseed-smallres/2, xseed+smallres/2, yseed+smallres/2)
-        
+
         vertgrad = image.convolve(seed, vertkern, 'same')
         horzgrad = image.convolve(seed, horzkern, 'same')
         score = vertgrad:abs():sum()  + horzgrad:abs():sum()
     end
 
-    -- make modifications to the image
-    exemplars = torch.DoubleTensor(nExemplars, 3, smallres, smallres)
-    for i = 1,nExemplars do
-        -- scaling: 0.7 to 1.4
-        toscale = fullres * (math.random()*0.7 + 0.7);
-        temp = image.scale(im, toscale, toscale)
+    if countGrad==100 then
+        return nil
+    else
+        -- seed = image.crop(im, xseed-smallres/2, yseed-smallres/2, xseed+smallres/2, yseed+smallres/2)
+        -- itorch.image(seed) -- uncomment to visualize in notebook
 
-        -- rotation: up to 20 degrees, i.e 0.35 radians
-        torotate = math.random()*0.7 - 0.35
-        temp = image.rotate(im, torotate)
+        -- make modifications to the image
+        exemplars = torch.DoubleTensor(nExemplars, 3, smallres, smallres)
+        for i = 1,nExemplars do
+            -- scaling: 0.7 to 1.4
+            toscale = fullres * (math.random()*0.7 + 0.7);
+            temp = image.scale(im, toscale, toscale)
 
-        -- convert to HSV for the next transformations
-        temp = image.rgb2hsv(temp)
+            -- rotation: up to 20 degrees, i.e 0.35 radians
+            torotate = math.random()*0.7 - 0.35
+            temp = image.rotate(im, torotate)
 
-        -- contrast 1: not implemented, requires PCA
+            -- convert to HSV for the next transformations
+            temp = image.rgb2hsv(temp)
 
-        -- contrast 2: convert to HSV; raise S and V to a power between 0.25 and 4 (edit: 3);
-        -- multiply by 0.7 through 1.4; add -0.1 to 0.1
-        topow = math.random() * 2.75 + 0.25
-        tomul = math.random() * 0.7 + 0.7
-        toadd = math.random() * 0.2 - 0.1
-        temp[{2,{},{}}] = torch.mul(torch.pow(temp[{2,{},{}}], topow), tomul) + toadd
+            -- contrast 1: not implemented, requires PCA
 
-        topow = math.random() * 2.75 + 0.25
-        tomul = math.random() * 0.7 + 0.7
-        toadd = math.random() * 0.2 - 0.1
-        temp[{3,{},{}}] = torch.mul(torch.pow(temp[{3,{},{}}], topow), tomul) + toadd
+            -- contrast 2: convert to HSV; raise S and V to a power between 0.25 and 4 (edit: 3);
+            -- multiply by 0.7 through 1.4; add -0.1 to 0.1
+            topow = math.random() * 2.75 + 0.25
+            tomul = math.random() * 0.7 + 0.7
+            toadd = math.random() * 0.2 - 0.1
+            temp[{2,{},{}}] = torch.mul(torch.pow(temp[{2,{},{}}], topow), tomul) + toadd
 
-        -- hue: add a value between -0.1 and 0.1 to the hue
-        toadd = math.random() * 0.2 - 0.1
-        temp[{1,{},{}}] = temp[{1,{},{}}] + toadd
-        temp[{1,{},{}}]:apply(wrapZeroOne)
+            topow = math.random() * 2.75 + 0.25
+            tomul = math.random() * 0.7 + 0.7
+            toadd = math.random() * 0.2 - 0.1
+            temp[{3,{},{}}] = torch.mul(torch.pow(temp[{3,{},{}}], topow), tomul) + toadd
 
-        -- convert back to RGB
-        temp = image.hsv2rgb(temp)
+            -- hue: add a value between -0.1 and 0.1 to the hue
+            toadd = math.random() * 0.2 - 0.1
+            temp[{1,{},{}}] = temp[{1,{},{}}] + toadd
+            temp[{1,{},{}}]:apply(wrapZeroOne)
 
-        -- translation: within 0.2 of the patch size
-        xpatch = torch.round(xseed + (math.random()*0.4 - 0.2)*smallres)
-        ypatch = torch.round(yseed + (math.random()*0.4 - 0.2)*smallres)
+            -- convert back to RGB
+            temp = image.hsv2rgb(temp)
 
-        exemplars[{{i}, {}, {}, {}}] = image.crop(temp, xpatch-smallres/2, ypatch-smallres/2, xpatch+smallres/2, ypatch+smallres/2)
+            -- translation: within 0.2 of the patch size
+            xpatch = torch.round(xseed + (math.random()*0.4 - 0.2)*smallres)
+            ypatch = torch.round(yseed + (math.random()*0.4 - 0.2)*smallres)
+
+            exemplars[{{i}, {}, {}, {}}] = image.crop(temp, xpatch-smallres/2, ypatch-smallres/2, xpatch+smallres/2, ypatch+smallres/2)
+        end
+
+        return exemplars
     end
-
-    return exemplars
 end
 
 
@@ -155,12 +174,16 @@ estimateInterval = 20; -- give updates after every nth class
 print '==> generating surrogate classes'
 idx = 1
 for class = 1,nClasses do
-    -- choose a seed image
-    imnum = math.random(1, inputData.size())
-    im = inputData.data[{imnum, {}, {}, {}}]
+    -- choose a seed image, avoid image patches with low gradients
+    local exdata=nil
+    while not exdata do
+        imnum = math.random(1, inputData.size())
+        im = inputData.data[{imnum, {}, {}, {}}]
+        exdata=makeExemplars(im, fullres, smallres, nExemplars)
+    end
 
     -- generate patches
-    newData.data[{{idx,idx+nExemplars-1}, {}, {}, {}}] = makeExemplars(im, fullres, smallres, nExemplars)
+    newData.data[{{idx,idx+nExemplars-1}, {}, {}, {}}] = exdata
 
     -- set class labels
     newData.labels[{{idx,idx+nExemplars-1}}] = class
@@ -179,11 +202,34 @@ for class = 1,nClasses do
 				  (os.date("!%X",estimate)))
 
 		 -- save partial progress while we're here
-		 partialname = opt.datafolder .. '/surrogate-partial.dat'
-		 torch.save(partialname, newData)
+         if opt.savedata then
+		     partialname = opt.datafolder .. '/surrogate-partial.dat'
+    		 torch.save(partialname, newData)
+         end
       end
 end
 
+inputData=nil
+-- add shuffling and demean step on newData
+for i= 1,3 do
+   -- de-mean each channel globally:
+   newData.data[{ {},i,{},{} }]:add(-newData.data[{ {},i,{},{} }]:mean())
+end
+sursize=newData:size()
+--shuffling
+surData = {data=torch.zeros(newData.data:size()),
+           labels=torch.zeros(newData.labels:size()),
+           size = function() return sursize end
+}
+surshuffle = torch.randperm(newData:size())
+for i = 1,newData:size() do
+    surData.data[{i,{},{},{}}] = newData.data[{surshuffle[i],{},{},{}}]
+    surData.labels[i] = newData.labels[surshuffle[i]]
+end
+newData=nil
+
 -- save full results
-filename = opt.datafolder .. '/surrogate.dat'
-torch.save(filename, newData,'ascii') --added format so we can re-load data
+if opt.savedata then
+    filename = opt.datafolder .. '/surrogate_8000_150.dat'
+    torch.save(filename, surData,'ascii') --added format so we can re-load data
+end

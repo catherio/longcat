@@ -2,7 +2,7 @@
 -- Data preprocessing
 --
 -- This script preprocesses the data.
--- 1, Load and reshape small or full unlabeled data for unsupervised learning
+-- 1, Does not load unlabel data, see 7_surrogateGen.lua
 -- 2, Load and reshape train and test dataset
 -- 3, Preprocess all datasets: zscore and normalize
 --
@@ -25,7 +25,6 @@ if not opt then
    cmd:text('STL-10 Dataset Preprocessing')
    cmd:text()
    cmd:text('Options:')
-   cmd:option('-size', 'small', 'how many unlabeled samples do we load: small | full')
    cmd:option('-datafolder', 'dataset', 'subdirectory where dataset is saved')
    cmd:text()
    opt = cmd:parse(arg or {})
@@ -37,21 +36,13 @@ end
 -- mattorch package allows 1-to-1 conversion between Torch and Matlab
 -- files.
 
-unlabel_file = opt.datafolder .. '/unlabel.dat'
-train_file = opt.datafolder .. '/train.dat'
-test_file = opt.datafolder .. '/test.dat'
+train_file = paths.concat(opt.datafolder,'train.dat')
+test_file = paths.concat(opt.datafolder,'test.dat')
 
 
 ----------------------------------------------------------------------
--- unlabeled/training/test size
+-- training/test size
 
-if opt.size == 'full' then
-   print '==> using full unlabeled data, recommend use only for final testing'
-   unsize = 100000
-elseif opt.size == 'small' then
-   print '==> using reduced unlabeled data, for fast experiments'
-   unsize = 10000
-end
 trsize = 5000
 tesize = 8000
 
@@ -69,17 +60,6 @@ print '==> loading dataset'
 -- normal view
 
 -- load the training data.
-
--- load the unlabel data.
-loaded = torch.load(unlabel_file,'ascii')
-loaded.X = loaded.X[{{},{1,unsize}}]
-
-unlabelData = {
-   data = loaded.X:transpose(1,2):reshape(unsize,3,96,96):transpose(3,4),
-   size = function() return unsize end
-}
-
-
 loaded = torch.load(train_file,'ascii')
 trainData = {
    data = loaded.X:transpose(1,2):reshape(trsize,3,96,96):transpose(3,4),
@@ -105,7 +85,8 @@ print '==> preprocessing data'
 -- where Type=='Float','Double','Byte','Int',... Shortcuts are provided
 -- for simplicity (float(),double(),cuda(),...):
 
-unlabelData.data = unlabelData.data:float()
+--trainData.data = trainData.data:float()
+--testData.data = testData.data:float()
 trainData.data = trainData.data:float()
 testData.data = testData.data:float()
 
@@ -125,33 +106,23 @@ testData.data = testData.data:float()
 
 
 -- Convert all images to YUV
-print '==> preprocessing data: colorspace RGB -> YUV'
-for i = 1,unlabelData:size() do
-    unlabelData.data[i] = image.rgb2yuv(unlabelData.data[i])
-end
-for i = 1,trainData:size() do
-    trainData.data[i] = image.rgb2yuv(trainData.data[i])
-end
-for i = 1,testData:size() do
-    testData.data[i] = image.rgb2yuv(testData.data[i])
-end
+--print '==> preprocessing data: colorspace RGB -> YUV'
+--for i = 1,trainData:size() do
+--    trainData.data[i] = image.rgb2yuv(trainData.data[i])
+--end
+--for i = 1,testData:size() do
+--    testData.data[i] = image.rgb2yuv(testData.data[i])
+--end
 
 -- Name channels for convenience
- channels = {'y','u','v'}
---channels = {'r','g','b'}
+--channels = {'y','u','v'}
+channels = {'r','g','b'}
 
 -- Normalize each channel, and store mean/std
 -- per channel. These values are important, as they are part of
 -- the trainable parameters. At test time, test data will be normalized
 -- using these values.
 print '==> preprocessing data: normalize each feature (channel) globally'
-
--- Normalize unlabeled data
-for i,channel in ipairs(channels) do
-   -- normalize each channel globally:
-   unlabelData.data[{ {},i,{},{} }]:add(-unlabelData.data[{ {},i,{},{} }]:mean())
-   unlabelData.data[{ {},i,{},{} }]:div(unlabelData.data[{ {},i,{},{} }]:std())
-end
 
 mean = {}
 std = {}
@@ -182,9 +153,6 @@ normalization = nn.SpatialContrastiveNormalization(1, neighborhood, 1):float()
 
 -- Normalize all channels locally:
 for c in ipairs(channels) do
-   for i = 1,unlabelData:size() do
-      unlabelData.data[{ i,{c},{},{} }] = normalization:forward(unlabelData.data[{ i,{c},{},{} }])
-   end
    for i = 1,trainData:size() do
       trainData.data[{ i,{c},{},{} }] = normalization:forward(trainData.data[{ i,{c},{},{} }])
    end
@@ -201,17 +169,11 @@ print '==> verify statistics'
 
 for i,channel in ipairs(channels) do
 
-   unlabelMean = unlabelData.data[{ {},i }]:mean()
-   unlabelStd = unlabelData.data[{ {},i }]:std()
-
    trainMean = trainData.data[{ {},i }]:mean()
    trainStd = trainData.data[{ {},i }]:std()
 
    testMean = testData.data[{ {},i }]:mean()
    testStd = testData.data[{ {},i }]:std()
-
-   print('unlabeled data, '..channel..'-channel, mean: ' .. unlabelMean)
-   print('unlabeled data, '..channel..'-channel, standard deviation: ' .. unlabelStd)
 
    print('training data, '..channel..'-channel, mean: ' .. trainMean)
    print('training data, '..channel..'-channel, standard deviation: ' .. trainStd)
