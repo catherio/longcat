@@ -99,7 +99,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         for batch=1,opt.nBatches do
             opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
             optim.sgd(feval, parameters, opt)
-            print("epoch: ", epoch, " batch: ", batch)
+            --print("epoch: ", epoch, " batch: ", batch)
         end
 
         local accuracy = test_model(model, test_data, test_labels, opt)
@@ -126,18 +126,22 @@ function main()
 
     -- Configuration parameters
     opt = {}
-    -- change these to the appropriate data locations
-    opt.glovePath = "/scratch/courses/DSGA1008/A3/glove" -- path to raw glove data .txt file
-    opt.dataPath = "/scratch/courses/DSGA1008/A3/data"
+
     -- word vector dimensionality
     opt.inputDim = 50 
+
+    -- change these to the appropriate data locations
+    opt.glovePath = "/scratch/courses/DSGA1008/A3/glove/glove.6B." .. opt.inputDim .. "d.txt" -- path to raw glove data .txt file
+    opt.dataPath = "/scratch/courses/DSGA1008/A3/data/train.t7b"
+
     -- nTrainDocs is the number of documents per class used in the training set, i.e.
     -- here we take the first nTrainDocs documents from each class as training samples
     -- and use the rest as a validation set.
     opt.nTrainDocs = 10000
     opt.nTestDocs = 0
     opt.nClasses = 5
-    -- SGD parameters - play around with these
+
+    -- SGD parameters - play around with these - TODO!!
     opt.nEpochs = 5
     opt.minibatchSize = 128
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
@@ -146,6 +150,7 @@ function main()
     opt.momentum = 0.1
     opt.idx = 1
 
+    -- Run everything
     print("Loading word vectors...")
     local glove_table = load_glove(opt.glovePath, opt.inputDim)
     
@@ -160,6 +165,8 @@ function main()
     local training_labels = labels:sub(1, opt.nClasses*opt.nTrainDocs):clone()
     
     -- make your own choices - here I have not created a separate test set
+    -- TODO! the opt.nTestDocs is not being used yet
+
     local test_data = training_data:clone() 
     local test_labels = training_labels:clone()
 

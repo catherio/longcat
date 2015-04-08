@@ -8,3 +8,5 @@
 *.out
 *.dat
 *result*
+*.e*
+*.o*
