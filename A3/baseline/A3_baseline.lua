@@ -127,7 +127,7 @@ function main()
     -- Configuration parameters
     opt = {}
 
-    -- word vector dimensionality
+    -- word vector dimensionality - TODO hyperparameter change me!
     opt.inputDim = 50 
 
     -- change these to the appropriate data locations
@@ -148,7 +148,7 @@ function main()
     opt.learningRate = 0.1
     opt.learningRateDecay = 0.001
     opt.momentum = 0.1
-    opt.idx = 1
+    opt.idx = 1 --TODO what does this do?
 
     -- Run everything
     print("Loading word vectors...")

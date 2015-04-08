@@ -1,4 +1,4 @@
--- CHANGE ME to change parameters!! --
+-- Here is where to change parameters!! --
 
 -- Configuration parameters
 opt = {}
@@ -8,7 +8,7 @@ opt = {}
 opt.inputDim = 50
 
 -- change these to the appropriate data locations
-opt.glovePath = "/scratch/courses/DSGA1008/A3/glove/glove.6B." .. opt.inputDim .. "0d.txt" -- path to raw glove data .txt file
+opt.glovePath = "/scratch/courses/DSGA1008/A3/glove/glove.6B." .. opt.inputDim .. "d.txt" -- path to raw glove data .txt file
 opt.dataPath = "/scratch/courses/DSGA1008/A3/data/train.t7b"
 
 -- nTrainDocs is the number of documents per class used in the training set, i.e.
@@ -27,3 +27,6 @@ opt.learningRateDecay = 0.001
 opt.momentum = 0.1
 opt.idx = 1
 
+-- Which model should we use?
+dofile('model_baseline.lua')
+opt.model = model_baseline
