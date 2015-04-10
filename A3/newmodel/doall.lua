@@ -16,22 +16,20 @@ print("Loading word vectors...")
 print(opt.glovePath)
 print(opt.inputDim)
 local glove_table = load_glove(opt.glovePath, opt.inputDim)
-    
+
 print("Loading raw data...")
 local raw_data = torch.load(opt.dataPath)
-    
+
 print("Computing document input representations...")
 local processed_data, labels = preprocess_data(raw_data, glove_table, opt)
-    
+
 -- Split data into makeshift training and validation sets
 local training_data = processed_data:sub(1, opt.nClasses*opt.nTrainDocs, 1, processed_data:size(2)):clone()
 local training_labels = labels:sub(1, opt.nClasses*opt.nTrainDocs):clone()
-    
--- make your own choices - here I have not created a separate test set
--- TODO! the opt.nTestDocs is not being used yet
 
-local test_data = training_data:clone() 
-local test_labels = training_labels:clone()
+-- The test_data is the rest of the processed_data and labels
+local test_data = processed_data:sub(opt.nClasses*opt.nTrainDocs+1,opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), 1, processed_data:size(2)):clone()
+local test_labels = labels:sub(opt.nClasses*opt.nTrainDocs+1,opt.nClasses*(opt.nTrainDocs+opt.nTestDocs)):clone()
 
 local model, criterion = opt.model()
 
