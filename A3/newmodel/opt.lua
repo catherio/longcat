@@ -15,7 +15,7 @@ opt.dataPath = "/scratch/courses/DSGA1008/A3/data/train.t7b"
 -- here we take the first nTrainDocs documents from each class as training samples
 -- and use the rest as a validation set.
 opt.nTrainDocs = 10000
-opt.nTestDocs = 0
+opt.nTestDocs = 1000
 opt.nClasses = 5
 
 -- SGD parameters - play around with these
