@@ -20,7 +20,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
     end
     
     for epoch=1,opt.nEpochs do
-        local order = torch.randperm(opt.nBatches) -- not really good randomization
+        local order = torch.randperm(opt.nBatches) -- not really good randomization, TODO fix it?
         for batch=1,opt.nBatches do
             opt.idx = (order[batch] - 1) * opt.minibatchSize + 1
             optim.sgd(feval, parameters, opt)

@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=6:00:00
+#PBS -l mem=32GB
+#PBS -M cao324@nyu.edu
+#PBS -N qsub_baseline
+
+module load torch
+module load cuda/6.5.12
+
+/home/cao324/torch/install/bin/th /scratch/cao324/longcat/A3/baseline/A3_baseline.lua

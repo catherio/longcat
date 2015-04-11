@@ -3,14 +3,10 @@ require 'torch'
 --- Parses and loads the GloVe word vectors into a hash table:
 -- glove_table['word'] = vector
 function load_glove(path, inputDim)
-    print("A")
-    
     local glove_file = io.open(path)
-    print("B")
     local glove_table = {}
 
     local line = glove_file:read("*l")
-    print("C")
     while line do
         -- read the GloVe text file one line at a time, break at EOF
         local i = 1
