@@ -27,6 +27,11 @@ opt.learningRateDecay = 0.001
 opt.momentum = 0.1
 opt.idx = 1
 
--- Which model should we use?
-dofile('model_baseline.lua')
-opt.model = model_baseline
+-- Which preprocessing should we use? (both load a "preprocess_data()")
+-- dofile('preprocess_
+dofile('preprocess_glove_plain.lua')
+
+-- Which model should we use? (both load a "get_model()")
+-- dofile('model_baseline.lua')
+dofile('model_deep_zhanglike.lua')
+

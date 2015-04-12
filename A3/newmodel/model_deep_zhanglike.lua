@@ -2,7 +2,7 @@
 -- Model based on Xiang Zhang's model
 --------------------------------------------------------------------------------------
 
-function model_baseline()
+function get_model()
     -- construct model:
     model = nn.Sequential()
        
@@ -13,14 +13,14 @@ function model_baseline()
 	-- 	we get 128 convolutional layers after this
 	--	and each integrates over 7 words, with no stride
     model:add(nn.ReLU())
-    model:add(nn.TemporalMaxPooling(3, 1))
+    model:add(nn.TemporalMaxPooling(3, 3))
     	-- Inspired by Text Understanding from Scratch, but starting
 	-- at their 'layer 2' because we already have words, we now
 	-- pool at a size of 3
 
 	-- If our input was length 198, it went down to 192, then pooled to 64
-    
-    -- Layers 2 and 3: We now add convolutional layers without pooling
+
+    -- Layers 2 and 3: Convolutional layers
     model:add(nn.TemporalConvolution(128, 128, 3, 1))
     model:add(nn.ReLU())
 
@@ -29,13 +29,10 @@ function model_baseline()
 
 	-- Input length should now be 60
 
-    -- Layer 4: One more convolutional layer and then pool
-    model:add(nn:TemporalConvolution(128, 128, 3, 1))
-    model:add(nn.ReLU())
-    model:add(nn.TemporalMaxPooling(3, 1))
-    	-- Input length to 60 then pool to 20
+    model:add(nn.TemporalMaxPooling(3, 3))
+    	-- Then pool to 20
 
-    -- Layer 5: Fully connected, with dropout
+    -- Layer 4: Fully connected, with dropout
     model:add(nn.Reshape(20*128, true))
     model:add(nn.Dropout(0.5))
 

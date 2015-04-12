@@ -2,7 +2,7 @@
 -- Baseline model
 --------------------------------------------------------------------------------------
 
-function model_baseline()
+function get_model()
     -- construct model:
     model = nn.Sequential()
        

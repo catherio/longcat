@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=4
+#PBS -l walltime=4:00:00
+#PBS -l mem=32GB
+#PBS -M cao324@nyu.edu
+#PBS -N plain
+
+module load torch
+module load cuda/6.5.12
+
+/home/cao324/torch/install/bin/th /scratch/cao324/longcat/A3/newmodel/doall.lua
