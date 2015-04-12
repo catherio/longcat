@@ -105,6 +105,9 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         local accuracy = test_model(model, test_data, test_labels, opt)
         print("epoch ", epoch, " error: ", accuracy)
 
+        if epoch % 3==0 then
+            opt.learningRate = opt.learningRate / 2
+        end
     end
 end
 
@@ -146,9 +149,9 @@ function main()
     opt.minibatchSize = 128
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
     opt.learningRate = 0.1
-    opt.learningRateDecay = 0.001
+    opt.learningRateDecay = 0 --Implemented halving learning rate every 3 epoches. this becomes 0
     opt.momentum = 0.1
-    opt.idx = 1 --TODO what does this do?
+    opt.idx = 1 --This is the index for slicing minibatches. Does not affect model training
 
     -- Run everything
     print("Loading word vectors...")
