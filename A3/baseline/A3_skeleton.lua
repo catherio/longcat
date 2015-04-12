@@ -44,21 +44,83 @@ end
 
 function TemporalLogExpPooling:updateOutput(input)
    -----------------------------------------------
-   -- assume input is a column vector
-   local inputsize = input:size(2)
-   self.output = input:mul(self.beta):exp():sum():div(inputsize):log():mul(1/self.beta)
+   -- assume input size is nbatch*inputsize(nrows)*nframe(ncols)
+    local ndim = input:size():size()
+    local nbatch = 0
+    local inputsize = 0
+    local nframe = 0
+
+    if ndim == 2 then
+        nbatch = 1
+        inputsize = input:size(1)
+        nframe = input:size(2)
+        input=input:reshape(nbatch,inputsize,nframe)
+    elseif ndim == 3 then
+        nbatch = input:size(1)
+        inputsize = input:size(2)
+        nframe = input:size(3)
+    end
+    local outputsize = math.floor((inputsize-self.kW)/self.dW+1)
+
+    self.output=torch.zeros(nbatch,outputsize,nframe)
+   --write a for loop to update each output entry by looping over batch and pooling windows
+    for nb = 1,nbatch do
+        local outindex = 0
+        for ns = 1,inputsize-self.kW+1,self.dW do
+            outindex = outindex+1
+            local insample = input[nb]:sub(ns,ns+self.kW-1):clone()
+            local insamplesize = insample:size(1)
+            insample:mul(self.beta):exp()
+            -- the sum needs to be written in a separate line for row-wise sum
+            local outsample = insample:sum(1):div(insamplesize):log():mul(1/self.beta)
+            self.output[nb][outindex] = outsample
+        end
+    end
    -----------------------------------------------
    return self.output
 end
 
 function TemporalLogExpPooling:updateGradInput(input, gradOutput)
    -----------------------------------------------
-   -- part 1: compute du/dx, element-wise exponential of input/sumof
-   local expinput = input:mul(self.beta):exp()
-   local du_dx = expinput:div(expinput:sum())
+   local ndim = input:size():size()
+   local nbatch = 0
+   local inputsize = 0
+   local nframe = 0
 
+   if ndim == 2 then
+       nbatch = 1
+       inputsize = input:size(1)
+       nframe = input:size(2)
+       input=input:reshape(nbatch,inputsize,nframe)
+   elseif ndim == 3 then
+       nbatch = input:size(1)
+       inputsize = input:size(2)
+       nframe = input:size(3)
+   end
+
+   self.gradInput = torch.zeros(nbatch,inputsize,nframe)
+   for nb = 1,nbatch do
+       local outindex = 0
+       for ns = 1,inputsize-self.kW+1,self.dW do
+           outindex = outindex+1
+           -- part 1: compute du/dx, element-wise exponential of input/sumof
+           -- part 2: use the chain rule, dL/du * du/dx, dL/du = gradOutput
+           local insample = input[nb]:sub(ns,ns+self.kW-1):clone()
+           insample:mul(self.beta):exp()
+           local expsample=insample:clone()
+           local insamplesum = insample:sum(1):clone()
+           local du_dx = torch.zeros(expsample:size())
+           for idx = 1,du_dx:size(2) do
+               du_dx:sub(1,-1,idx,idx):add(expsample:sub(1,-1,idx,idx):div(insamplesum[1][idx])):mul(gradOutput[nb][outindex][idx])
+           end
+           self.gradInput[nb]:sub(ns,ns+self.kW-1):add(du_dx)
+       end
+   end
+   -- part 1: compute du/dx, element-wise exponential of input/sumof
+   --local expinput = input:mul(self.beta):exp()
+   --local du_dx = expinput:div(expinput:sum())
    -- part 2: use the chain rule here, dL/du * du/dx, dL/du = gradOutput
-   self.gradInput = du_dx:mul(gradOutput)
+   --self.gradInput = du_dx:mul(gradOutput)
    -----------------------------------------------
    return self.gradInput
 end
