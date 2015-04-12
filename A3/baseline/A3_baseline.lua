@@ -105,7 +105,8 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         local accuracy = test_model(model, test_data, test_labels, opt)
         print("epoch ", epoch, " error: ", accuracy)
 
-        if epoch % 3==0 then
+        -- halve the learning rate every 3 epochs
+        if epoch % 10==0 then
             opt.learningRate = opt.learningRate / 2
         end
     end
@@ -145,13 +146,20 @@ function main()
     opt.nClasses = 5
 
     -- SGD parameters - play around with these - TODO!!
-    opt.nEpochs = 5
+    opt.nEpochs = 50
     opt.minibatchSize = 128
     opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
     opt.learningRate = 0.1
     opt.learningRateDecay = 0 --Implemented halving learning rate every 3 epoches. this becomes 0
-    opt.momentum = 0.1
+    opt.momentum = 0.01
     opt.idx = 1 --This is the index for slicing minibatches. Does not affect model training
+
+    opt.nfeature = 20
+    opt.filtsize = 10
+    opt.filtstride = 1
+    opt.poolsize = 3
+    opt.poolstride = 1
+    opt.beta = 1 --param for logexp pooling. 0 is average pooling, inf is max pooling
 
     -- Run everything
     print("Loading word vectors...")
@@ -175,18 +183,26 @@ function main()
     model = nn.Sequential()
 
     -- if you decide to just adapt the baseline code for part 2, you'll probably want to make this linear and remove pooling
-    model:add(nn.TemporalConvolution(1, 20, 10, 1))
+    model:add(nn.TemporalConvolution(1, opt.nfeature, opt.filtsize, opt.filtstride))
 
     --------------------------------------------------------------------------------------
     -- Replace this temporal max-pooling module with your log-exponential pooling module:
     --dofile 'A3_skeleton.lua'
-    --model:add(nn.TemporalLogExpPooling(3, 1, 10))
+    --model:add(nn.TemporalLogExpPooling(3, 1, opt.beta))
 
     --------------------------------------------------------------------------------------
-    model:add(nn.TemporalMaxPooling(3, 1))
+    model:add(nn.TemporalMaxPooling(opt.poolsize, opt.poolstride))
 
-    model:add(nn.Reshape(20*39, true))
-    model:add(nn.Linear(20*39, 5))
+    local calcDim = function(x,filtsize,poolsize)
+    -- this equation computes the new dim of images given filtsize and padsize
+    -- this does not work for stride ~=1, or padding ~=0
+        return math.floor((x-filtsize)/poolsize+1)
+    end
+
+    nfeatureout = calcDim(calcDim(opt.inputDim,opt.filtsize,opt.filtstride),opt.poolsize,opt.poolstride)
+
+    model:add(nn.Reshape(opt.nfeature*nfeatureout, true))
+    model:add(nn.Linear(opt.nfeature*nfeatureout, 5))
     model:add(nn.LogSoftMax())
 
     criterion = nn.ClassNLLCriterion()
