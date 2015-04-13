@@ -12,7 +12,7 @@ function preprocess_data(raw_data, wordvector_table, opt)
     -- Dimensions here are nDocs * docLength * featureSize
     local data = torch.zeros(opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), maxWords, opt.inputDim + extraFeat)
     local labels = torch.zeros(opt.nClasses*(opt.nTrainDocs + opt.nTestDocs))
-    
+
     -- use torch.randperm to shuffle the data, since it's ordered by class in the file
     local order = torch.randperm(opt.nClasses*(opt.nTrainDocs+opt.nTestDocs))
 
@@ -23,7 +23,7 @@ function preprocess_data(raw_data, wordvector_table, opt)
 		  -- in the final matrix where the ith class will be put
 
             local doc_size = 1
-            
+
             local index = raw_data.index[i][j]
 
             -- load document and standardize
@@ -43,7 +43,7 @@ function preprocess_data(raw_data, wordvector_table, opt)
 		   data[k][wordsSoFar][-1] = 1 -- set the "punctuation" flag
 		else if wordvector_table[word:gsub("%p+", "")] then --non-punctuation
 		    wordsSoFar = wordsSoFar + 1
-		    wordvec = wordvector_table[word:gsub("%p+", "")])
+		    wordvec = wordvector_table[word:gsub("%p+", "")]
                     data[k][wordsSoFar][{{1,-2}}]:add(wordvec) -- fill up to the second-to-last bin; space for punctuation
                 end
             end
