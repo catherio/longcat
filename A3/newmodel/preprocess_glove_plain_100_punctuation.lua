@@ -6,8 +6,11 @@ function preprocess_data(raw_data, wordvector_table, opt)
 
     maxWords = 104
 
+    -- Anticipate how many extra features there will be
+    extraFeat = 1; -- just the punctuation feature
+
     -- Dimensions here are nDocs * docLength * featureSize
-    local data = torch.zeros(opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), maxWords, opt.inputDim)
+    local data = torch.zeros(opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), maxWords, opt.inputDim + extraFeat)
     local labels = torch.zeros(opt.nClasses*(opt.nTrainDocs + opt.nTestDocs))
     
     -- use torch.randperm to shuffle the data, since it's ordered by class in the file
@@ -26,6 +29,7 @@ function preprocess_data(raw_data, wordvector_table, opt)
             -- load document and standardize
             local document = ffi.string(torch.data(raw_data.content:narrow(1, index, 1))):lower() --lowercase
             document = document:gsub("\\n", " ") --replace newlines with spaces
+	    document = document:gsub("(%p+)", " %1 ") --wrap punctuation with spaces
 
             -- break each review into words and put them in the table
 	    wordsSoFar = 0
@@ -34,9 +38,13 @@ function preprocess_data(raw_data, wordvector_table, opt)
 		   break
 		end
 
-                if wordvector_table[word:gsub("%p+", "")] then
+		if word:gmatch("%p+") ~= "" then -- punctuation
+		   wordsSoFar = wordsSoFar + 1
+		   data[k][wordsSoFar][-1] = 1 -- set the "punctuation" flag
+		else if wordvector_table[word:gsub("%p+", "")] then --non-punctuation
 		    wordsSoFar = wordsSoFar + 1
-                    data[k][wordsSoFar]:add(wordvector_table[word:gsub("%p+", "")])		  
+		    wordvec = wordvector_table[word:gsub("%p+", "")])
+                    data[k][wordsSoFar][{{1,-2}}]:add(wordvec) -- fill up to the second-to-last bin; space for punctuation
                 end
             end
 	    -- If we run out of words, don't do anything fancy; just leave the rest zeros
