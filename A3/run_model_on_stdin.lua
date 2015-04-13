@@ -10,7 +10,6 @@ require 'optim'
 function load_glove(path, inputDim)
     local glove_file = io.open(path)
     local glove_table = {}
-
     local line = glove_file:read("*l")
     while line do
         -- read the GloVe text file one line at a time, break at EOF
@@ -40,33 +39,26 @@ end
 
 function preprocess_data(msg, wordvector_table, inputDim)
     maxWords = 104
-    -- Anticipate how many extra features there will be
-    extraFeat = 1; -- just the punctuation feature
     -- Dimensions here are nDocs * docLength * featureSize
-    local data = torch.zeros(1, maxWords, inputDim + extraFeat)
+    local data = torch.zeros(1, maxWords, inputDim)
     local doc_size = 1
-
     -- load document and standardize
     local document = msg:lower() --lowercase
     document = document:gsub("\\n", " ") --replace newlines with spaces
-    document = document:gsub("(%p+)", " %1 ") --wrap punctuation with spaces
 
     -- break each review into words and put them in the table
     wordsSoFar = 0
     for word in document:gmatch("%S+") do
         if wordsSoFar >= maxWords then
-    	   break
-    	end
+            break
+        end
 
-    	if word:gmatch("%p+") ~= "" then -- punctuation
-           wordsSoFar = wordsSoFar + 1
-    	   data[k][wordsSoFar][-1] = 1 -- set the "punctuation" flag
-    	else if wordvector_table[word:gsub("%p+", "")] then --non-punctuation
-           wordsSoFar = wordsSoFar + 1
-           wordvec = wordvector_table[word:gsub("%p+", "")])
-           data[1][wordsSoFar][{{1,-2}}]:add(wordvec) -- fill up to the second-to-last bin; space for punctuation
+        if wordvector_table[word:gsub("%p+", "")] then
+            wordsSoFar = wordsSoFar + 1
+            data[k][wordsSoFar]:add(wordvector_table[word:gsub("%p+", "")])
         end
     end
+
     -- If we run out of words, don't do anything fancy; just leave the rest zeros
     return data
 end
