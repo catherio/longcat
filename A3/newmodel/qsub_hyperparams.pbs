@@ -1,0 +1,23 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=1:gpus=1:titan
+#PBS -l walltime=4:00:00
+#PBS -l mem=32GB
+#PBS -M cao324@nyu.edu
+#PBS -N 
+
+module load torch
+module load cuda/6.5.12
+
+cd /scratch/cao324/longcat/A3/newmodel
+
+for lr in 0.02
+do
+    for mom in 0.3
+    do
+	for cutperiod in 7
+	do
+	    /home/cao324/torch/install/bin/th /scratch/cao324/longcat/A3/newmodel/doparam.lua -learningRate $lr -momentum $mom -learningRateCutPeriod $cutperiod
+	done
+    done
+done
+

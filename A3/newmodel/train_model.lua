@@ -63,7 +63,7 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         end
 
         local accuracy = test_model(model, test_data, test_labels, opt)
-	opt.trainlogger:add{['% mean class accuracy (train set)'] = accuracy}
+	opt.trainlogger:add{['% mean class accuracy (test set)'] = accuracy}
         print("epoch ", epoch, " error: ", accuracy)
 
 	local modelfile = paths.concat(opt.rundir, opt.modelName)
