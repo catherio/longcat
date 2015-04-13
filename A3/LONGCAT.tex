@@ -29,16 +29,16 @@
 
 \begin{document} \maketitle
 
-\section*{Part 1: Log-exponential pooling}
+\section{Log-exponential pooling}
 
 For part 1 of the assignment, we tuned the hyperparameters for the baseline model after implementing log-exponential pooling. With the parameters reported below, we achieved at best 51.6\% error with 50 training epochs, using 10,000 training documents per class, and 1,000 validation documents per class. 
 
-\subsection*{Architecture and training}
+\subsection{Architecture and training}
 We mainly focused on the following hyperparameters: dimensionality of GloVe representation for each word (inputDim), number of filters for temporal convolution (nfilter), convolutional filter size (filtsize), pooling size (poolsize), the stride for convolution filters and pooling (stride). We eventually settled on the following hyperparameters: \texttt{inputDim=200, nfilter=60, filtsize=10, poolsize=7, stride=1}.
 
 We used stochastic gradient descent to train our baseline model. We apply the learning rate at 0.1, with a momentum of 0.01. For every 10 training epochs, we reduce the learning rate by half. The batch size we apply is 128. In general, we found that increasing the dimensionality of input data helps with reducing error, i.e. increasing GloVe representation and number of convolutional filters. 
 
-\subsection*{Implementation of log-exponential pooling} 
+\subsection{Implementation of log-exponential pooling} 
 
 We also coded a Module \texttt{TemporalLogExpPooling} that performs log-exponential pooling (Boureau et al. 2010). The log-exponential pooling follows equation \ref{logexp}:
 
@@ -71,23 +71,23 @@ We also run a gradient checker to ensure that the module is correct. To do so, w
 
 One caveat in our current module implementation is that we use for-loops to loop over all batches and pooling windows. This regime results in slow computation during model training, and the GPU could not efficiently accelerate the computation. We think that applying matrix multiplication for the pooling operation would speed up the module computation; this could be achieved by constructing the Jacobian matrix and multiplying through the entire vector at once. We would like to work on speeding up the module computation in the future. 
 
-\section*{Part 2: Convolutional model}
+\section{Convolutional model}
 
 We chose to implement a convolutional model on top of pre-trained GloVe vectors as our extension for Part 2. Convolutional models improve on the bag-of-words model in the baseline, because they can incorporate word order. We chose \emph{not} to implement a recurrent model only because of the additional implementation difficulty; recurrent models can better capture long-range information.
 
 The sections below describe the experiments we performed before settling on our final model, and what motivated our choices. The ``Final Model'' section ultimately explains the completed model that is behind our submission.
 
-\subsubsection*{Choosing a model}
+\subsubsection{Choosing a model}
 
 The first model we built was a large a multi-layer network, similar to layer 2 and beyond from Zhang's paper, but made smaller for easier testing. In our first (overly ambitious) model, layer 1 was a 7-width convolutional layer with 128 filters, operating over GloVe vectors, followed by a size-3 pooling; Layers 2 through 4 were 128-filter convolutional layers (two without pooling, one with); and the final layer was fully-connected.
 
-However, we found this many-layer network confusing to train. We could not tell what was causing difficulties -- insufficient data? too large learning rate? too much or too little momentum? insufficient regularization?
+However, we found this many-layer network difficult to train due to a lack of problem-specific intuition. Insufficient data, learning rate, momentum, and regularization parameters were difficult to rapidly and effectively tune. 
 
-Therefore, we decided to scale back to working with a much smaller network where we could build more intuition. Although our final performance with the small network was ultimately nowhere near as impressive as it might have been if we had successfully run a more ambitious model, we ultimately learned more about the practicalities of training neural networks by working in a much smaller sandbox where we could get rapid feedback on our experiments.
+Therefore, we scaled back to a much smaller network where we could build more intuition. Although our final performance with the small network was ultimately not as impressive as it might have been if we had successfully run a more ambitious model, we ultimately learned more about the practicalities of training neural networks by working in a much smaller sandbox where we could get rapid feedback on our experiments.
 
 Our final model, described in detail in section~\ref{finalmodel}, contains just two convolutional layers, followed by one pooling layer, before the fully-connected layer.
 
-\subsubsection*{Architectural decisions}
+\subsubsection{Architectural decisions}
 
 Here are a few of the architectural decisions we considered, and how we selected our final parameters:
 \begin{enumerate}
@@ -97,7 +97,7 @@ Here are a few of the architectural decisions we considered, and how we selected
 \item{\textbf{Fan-out and fan-in of convolutional layers:}} Initially we set both convolutional layers to 128 filters. Increasing the fan-out of the first layer, to 256, improved our performance from 61\% error to 57\% error at the time it was implemented. We chose not to increase the size of the second layer at the time, because we did not want to increase the number of parameters too drastically; increasing the sizes of other layers would be a promising future direction.
 \end{enumerate}
 
-\subsubsection*{Training decisions}
+\subsubsection{Training decisions}
 
 We started out doing very small experiments, with 10,000 samples per class, to figure out an appropriate learning rate and momentum. Our initial tests, starting with a learning rate around 0.1 and a momentum around 0.1, would plateau or oscillate with a testing error in the mid-to-low 60's; increasing the momentum, and decreasing the learning rate or instating periodic learning rate cuts by 50\%, did not improve the problem very much. We were disheartened, because the baseline model had been able to perform better with this dataset size.
 
@@ -107,7 +107,7 @@ We did not create any new synthetic data as a means of data augmentation; not on
 
 In attempting to scale up to use more data, we periodically ran into memory issues, sometimes on GPU and sometimes on CPU. We discovered that may of our GPU memory woes were actually due to too much *testing* data, not too much training data, because the testing data was not being loaded in bite-sized batch chunks. Choosing to keep our test set size at 1000, even as we loaded more training data, avoided this issue.
 
-\subsubsection*{Text processing choices}
+\subsubsection{Text processing choices}
 The baseline parsing from words to GloVe vectors operated by splitting the text on spaces and dropping punctuation. We added two improvements:
 
 \begin{itemizedense}
@@ -122,7 +122,7 @@ In terms of how to handle variable-length input, we chose the approach of cuttin
 
 Other extensions we would have liked to try out, but did not have time for, included: adding START and END padding to the start and end of the review; creating a ``number'' feature, encoding the value of any numbers; creating a capitalization feature; backwards quantization of; and discarding rare words (to prevent misidentification of slang: for example, the word ``tho'' is recognized by GloVe, but its representation is nowhere close to ``though'')
 
-\subsection*{Final Model}
+\subsection{Final Model}
 \label{finalmodel}
 
 The model we ultimately present here has the following architecture:
@@ -148,11 +148,11 @@ We trained our final model using the following training:
 \item Testing set of 1,000 samples per class
 \end{itemizedense}
 
-\section*{Results}
+\section{Results}
 
 Ultimately, our model performed with 47\% error on its testing set.
 
-\section*{References}
+\section{References}
 
 Boureau, Y. L., Ponce, J., \& LeCun, Y. (2010). A theoretical analysis of feature pooling in visual recognition. In \emph{Proceedings of the 27th International Conference on Machine Learning (ICML-10)} (pp. 111-118).
 
