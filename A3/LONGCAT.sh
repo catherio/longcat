@@ -22,4 +22,3 @@ cp /scratch/ls3470/DeepLearning/longcat/A3/newmodel/test_model.lua ./newmodel
 cp /scratch/ls3470/DeepLearning/longcat/A3/newmodel/train_model.lua ./newmodel
 
 cp /scratch/ls3470/DeepLearning/longcat/A3/LONGCAT.pdf ./
-cp /scratch/ls3470/DeepLearning/longcat/A3/model.net ./

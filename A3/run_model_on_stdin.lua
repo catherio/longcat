@@ -77,7 +77,7 @@ function main()
 
     print("Loading trained model...")
     --load model
-    modelPath = "./model.net"
+    modelPath = "/scratch/ls3470/DeepLearning/longcat/A3/model.net"
     model = torch.load(modelPath)
     model:cuda()
     model:evaluate()
