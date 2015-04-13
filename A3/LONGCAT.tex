@@ -1,4 +1,14 @@
 \documentclass{article}
+\usepackage{nips14submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage{natbib}
+%\usepackage{fullpage}
 
 \newenvironment{itemizedense}{
 \begin{itemize}
@@ -9,40 +19,22 @@
 
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 
-\title{DS-GA-1008 Assignment 3}
-\author{LongCat: Catherine Olsson and Long Sha and Kevin Brown}
+\title{DS-GA-1008 Assignment 3: Team Longcat}
+\author{Catherine Olsson, Long Sha, and Kevin Brown}
 
-\usepackage{nips14submit_e,times}
-\usepackage{hyperref}
-\usepackage{url}
-\usepackage{graphicx}
-\usepackage{caption}
-\usepackage{subcaption}
-\usepackage{amsmath}
-\usepackage{enumerate}
-\usepackage{natbib}
-\usepackage{fullpage}
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
 
 \begin{document} \maketitle
-
-\begin{abstract}
-This is an abstract. TODO finish me!
-\end{abstract}
 
 \section*{Part 1: Log-exponential pooling}
 
 For part 1 of the assignment, we tuned the hyperparameters for the baseline model after implementing log-exponential pooling. With the parameters reported below, we achieved at best 51.6\% error with 50 training epochs, using 10,000 training documents per class, and 1,000 validation documents per class. 
 
 \subsection*{Architecture and training}
-We mainly focused on the following hyperparameters: dimensionality of GloVe representation for each word (inputDim), number of filters for temporal convolution (nfilter), convolutional filter size (filtsize), pooling size (poolsize), the stride for convolution filters and pooling (stride). We eventually settled on the following hyperparameters:
-
-\begin{enumerate}
-\item GLoVe vector size: 200
-\item number of filters: 60
-\item filter size: 10
-\item pooling size: 7
-\item stride: 1
-\end{enumerate}
+We mainly focused on the following hyperparameters: dimensionality of GloVe representation for each word (inputDim), number of filters for temporal convolution (nfilter), convolutional filter size (filtsize), pooling size (poolsize), the stride for convolution filters and pooling (stride). We eventually settled on the following hyperparameters: \texttt{inputDim=200, nfilter=60, filtsize=10, poolsize=7, stride=1}.
 
 We used stochastic gradient descent to train our baseline model. We apply the learning rate at 0.1, with a momentum of 0.01. For every 10 training epochs, we reduce the learning rate by half. The batch size we apply is 128. In general, we found that increasing the dimensionality of input data helps with reducing error, i.e. increasing GloVe representation and number of convolutional filters. 
 
@@ -83,9 +75,7 @@ One caveat in our current module implementation is that we use for-loops to loop
 
 We chose to implement a convolutional model on top of pre-trained GloVe vectors as our extension for Part 2. Convolutional models improve on the bag-of-words model in the baseline, because they can incorporate word order. We chose \emph{not} to implement a recurrent model only because of the additional implementation difficulty; recurrent models can better capture long-range information.
 
-The ``Experimentation Phase'' section below describes the experiments we performed before settling on our final model, and what motivated our choices. The ``Final Model'' section explains the final model that is behind our submission.
-
-\subsection*{Experimentation phase}
+The sections below describe the experiments we performed before settling on our final model, and what motivated our choices. The ``Final Model'' section ultimately explains the completed model that is behind our submission.
 
 \subsubsection*{Choosing a model}
 
@@ -120,11 +110,11 @@ In attempting to scale up to use more data, we periodically ran into memory issu
 \subsubsection*{Text processing choices}
 The baseline parsing from words to GloVe vectors operated by splitting the text on spaces and dropping punctuation. We added two improvements:
 
-\begin{itemize}
+\begin{itemizedense}
 \item \textbf{Stripping \textbackslash n}: The original text contains many words where the newline character has been appended, which prevents it from being turned into a GloVe vector correctly. We strip those by removing all instances of ``\textbackslash n''. At the time when we implemented this extension, it improved our error from 58\% to 56\%.
 
 \item \textbf{Punctuation feature}: Using the advice from Collobert et al. (2011), in the section on ``Extending to Any Discrete Features'', we chose to add an additional ``punctuation feature'' to our GloVe vectors. We split out each block of adjacent punctuation into aseparate ``word'', which we then encode as a single ``1'' in the 101st dimension regardless of the identity or length of the punctuation. The original 100-dimensional GloVe vectors are padded with a trailing zero to make space for the punctuation feature. This does unfortunately cause words like ``don't'' to be encoded as three words, but it also allows the model to respect sentence breaks. 
-\end{itemize}
+\end{itemizedense}
 
 Unfortunately, we accidentally forgot to include our clever punctuation improvement in our final fully-trained model.
 
@@ -137,30 +127,30 @@ Other extensions we would have liked to try out, but did not have time for, incl
 
 The model we ultimately present here has the following architecture:
 
-\begin{itemize}
+\begin{itemizedense}
 \item After preprocessing, the input is a length-104 sequence of 100-dimensional GloVe vectors
 \item Convolution 1: 256 filters of width 7, followed by ReLU
 \item Convolution 2: 128 filters of width 3, followed by ReLU
 \item Max pooling: width of 2, stride of 2 (nonoverlapping)
 \item Fully connected layer, followed by ReLU
 \item Linear output layer: from 128 to five classes, followed by a log soft max, in preparation for an NLL criterion.
-\end{itemize}
+\end{itemizedense}
 
 Preprocessing consists of splitting the text on whitespace, removing punctuation, and reading in up to 104 of those ``words'', ignoring and bypassing any words that are not found in the GloVe table.
 
 We trained our final model using the following training:
-\begin{itemize}
+\begin{itemizedense}
 \item Learning Rate: Decreased manually every five epochs: 0.05, then 0.01, then 0.001
 \item Momentum: 0.1, then 0.1, then 0.2
 \item Loss function: negative log likelihood
 \item Regularization: one dropout layer of 0.5 before the fully connected layer
 \item Training dataset of 100,000 samples per class
 \item Testing set of 1,000 samples per class
-\end{itemize}
+\end{itemizedense}
 
 \section*{Results}
 
-Ultimately, our model performed with TODO error on TODO.
+Ultimately, our model performed with 47\% error on its testing set.
 
 \section*{References}
 
