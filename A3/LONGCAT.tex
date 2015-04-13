@@ -1,7 +1,20 @@
 \documentclass{article}
+
+\newenvironment{itemizedense}{
+\begin{itemize}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
 \title{DS-GA-1008 Assignment 3}
 \author{LongCat: Catherine Olsson and Long Sha and Kevin Brown}
 
+\usepackage{nips14submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
