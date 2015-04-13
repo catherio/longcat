@@ -88,7 +88,7 @@ function main()
       data = data:cuda()
       pred = model:forward(data)
       m,ptarget = pred:max(2)
-      io.write(ptarget[1],'\n')
+      io.write(ptarget[1][1],'\n')
 
       -- e.g. class = model_output
       -- io.write( class, '\n' )

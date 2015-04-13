@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# ADD ANYTHING ELSE THAT MIGHT NEED TO add torch/lua, our code etc to the path
+module load cuda/6.5.12
 module load torch
 
-cd /home/kab695/DL/longcat/A3
+cd ~/LONGCAT
 
-th run_model_on_stdin.lua
+/home/cao324/torch/install/bin/th run_model_on_stdin.lua
