@@ -109,6 +109,10 @@ function train_model(model, criterion, data, labels, test_data, test_labels, opt
         if epoch % 10==0 then
             opt.learningRate = opt.learningRate / 2
         end
+	
+	local modelfile = paths.concat('./', 'model_LogExpPool.net')
+	torch.save(modelfile,model)
+
     end
 end
 
@@ -132,7 +136,7 @@ function main()
     opt = {}
 
     -- word vector dimensionality - TODO hyperparameter change me!
-    opt.inputDim = 50
+    opt.inputDim = 200
 
     -- change these to the appropriate data locations
     opt.glovePath = "/scratch/courses/DSGA1008/A3/glove/glove.6B." .. opt.inputDim .. "d.txt" -- path to raw glove data .txt file
@@ -154,12 +158,12 @@ function main()
     opt.momentum = 0.01
     opt.idx = 1 --This is the index for slicing minibatches. Does not affect model training
 
-    opt.nfeature = 20
+    opt.nfeature = 60
     opt.filtsize = 10
     opt.filtstride = 1
-    opt.poolsize = 3
+    opt.poolsize = 7
     opt.poolstride = 1
-    opt.beta = 1 --param for logexp pooling. 0 is average pooling, inf is max pooling
+    opt.beta = 100 --param for logexp pooling. 0 is average pooling, inf is max pooling
 
     -- Run everything
     print("Loading word vectors...")
@@ -187,11 +191,11 @@ function main()
 
     --------------------------------------------------------------------------------------
     -- Replace this temporal max-pooling module with your log-exponential pooling module:
-    --dofile 'A3_skeleton.lua'
-    --model:add(nn.TemporalLogExpPooling(3, 1, opt.beta))
+    dofile 'A3_skeleton.lua'
+    model:add(nn.TemporalLogExpPooling(3, 1, opt.beta))
 
     --------------------------------------------------------------------------------------
-    model:add(nn.TemporalMaxPooling(opt.poolsize, opt.poolstride))
+    --model:add(nn.TemporalMaxPooling(opt.poolsize, opt.poolstride))
 
     local calcDim = function(x,filtsize,poolsize)
     -- this equation computes the new dim of images given filtsize and padsize

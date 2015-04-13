@@ -55,7 +55,7 @@ function preprocess_data(msg, wordvector_table, inputDim)
 
         if wordvector_table[word:gsub("%p+", "")] then
             wordsSoFar = wordsSoFar + 1
-            data[k][wordsSoFar]:add(wordvector_table[word:gsub("%p+", "")])
+            data[1][wordsSoFar]:add(wordvector_table[word:gsub("%p+", "")])
         end
     end
 
@@ -85,8 +85,9 @@ function main()
     do
       local msg = io.read()
       data = preprocess_data(msg, glove_table, inputDim)
+      data = data:cuda()
       pred = model:forward(data)
-      m,ptarget = pred:max(1)
+      m,ptarget = pred:max(2)
       io.write(ptarget[1],'\n')
 
       -- e.g. class = model_output
