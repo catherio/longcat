@@ -29,11 +29,27 @@ training_labels = labels:sub(1, opt.nClasses*opt.nTrainDocs):clone()
 test_data = processed_data:sub(opt.nClasses*opt.nTrainDocs+1,opt.nClasses*(opt.nTrainDocs+opt.nTestDocs), 1, processed_data:size(2)):clone()
 test_labels = labels:sub(opt.nClasses*opt.nTrainDocs+1,opt.nClasses*(opt.nTrainDocs+opt.nTestDocs)):clone()
 
-model, criterion = get_model()
+-- If we got this far, then make a new directory for everything; copy opt into there
+datestring = os.date('%m_%d_%X'):gsub(':(.+):', 'h%1m')
+opt.rundir = './rundir_' .. datestring .. '/'
 
+os.execute('mkdir ' .. opt.rundir)
+os.execute('cp opt.lua ' .. opt.rundir)
+
+opt.trainlogger = optim.Logger(opt.rundir .. datestring .. '_train.log')
+opt.testlogger = optim.Logger(opt.rundir .. datestring .. '_test.log')
+
+-- Do the thing!
 print("Training model...")
 print(training_data:size())
-train_model(model, criterion, training_data, training_labels, test_data, test_labels, opt)
-results = test_model(model, test_data, test_labels)
+train_model(opt.model, opt.criterion, training_data, training_labels, test_data, test_labels, opt)
 
+if opt.type == 'cuda' then
+   test_data = test_data:cuda()
+   test_labels = test_labels:cuda()
+end
+
+results = test_model(opt.model, test_data, test_labels)
+
+opt.testlogger:add{['% mean class accuracy (test set)'] = results}
 print(results)
