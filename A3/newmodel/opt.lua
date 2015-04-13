@@ -23,21 +23,28 @@ opt.nClasses = 5
 
 -- SGD parameters - play around with these
 --opt.nEpochs = 5
-opt.nEpochs = 20
+opt.nEpochs = 50
 opt.minibatchSize = 128
 opt.nBatches = math.floor(opt.nTrainDocs / opt.minibatchSize)
-opt.learningRate = 0.1
+opt.learningRate = 0.05
 opt.learningRateDecay = 0.001
-opt.momentum = 0.1
+opt.momentum = 0.2
 opt.idx = 1
 
+-- Handmade SGD parameters
+opt.learningRateCut = true
+opt.learningRateCutAmount = 0.5
+opt.learningRateCutPeriod = 3
+
 -- Which preprocessing should we use? (both load a "preprocess_data()")
--- dofile('preprocess_
-dofile('preprocess_glove_plain.lua')
+-- dofile('preprocess_glove_plain.lua')
+dofile('preprocess_glove_plain_100.lua')
 
 -- Which model should we use? (both load a "get_model()")
 -- dofile('model_baseline.lua')
-dofile('model_deep_zhanglike.lua')
+-- dofile('model_deep_zhanglike.lua')
+-- dofile('model_deep_take2.lua')
+dofile('model_shallower.lua')
 opt.model, opt.criterion = get_model()
 
 -- to CUDA or not to CUDA?
