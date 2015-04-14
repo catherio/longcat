@@ -70,19 +70,19 @@ end
 -- model should take that into account if necessary
 function main()
     --load glove table
-    print("Loading word vectors...")
+    --print("Loading word vectors...")
     inputDim = 100
     glovePath = "/scratch/courses/DSGA1008/A3/glove/glove.6B." .. inputDim .. "d.txt" -- path to raw glove data .txt file
     glove_table = load_glove(glovePath, inputDim)
 
-    print("Loading trained model...")
+    --print("Loading trained model...")
     --load model
     modelPath = "/scratch/ls3470/DeepLearning/longcat/A3/model.net"
     model = torch.load(modelPath)
     model:cuda()
     model:evaluate()
 
-    print("Total number of reviews: ")
+    --print("Total number of reviews: ")
     n = io.read()
     for i=1,n
     do
